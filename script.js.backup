@@ -86,79 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dusResolver) { dusResolver({ ti, qty }); dusResolver = null; }
     });
 
-    // ── Modal Transfer (pindah karton antar item) ──
-    const xfOverlay = $('modal-transfer-overlay'), xfQtyEl = $('transfer-qty'), xfToEl = $('transfer-to'), xfPrev = $('transfer-preview');
-    let xfResolver = null, xfCtx = null; // xfCtx = { fromIdx, ci, tplId, maxQty, tp }
-
-    function showTransferModal(fromIdx, ci) {
-        const item = items[fromIdx], c = item.cartons[ci];
-        const tplMap = buildTplMap();
-        const tp = tplMap.get(c.tplId);
-        if (!tp) return;
-        xfCtx = { fromIdx, ci, tplId: c.tplId, maxQty: c.qty, tp };
-
-        $('transfer-from-label').textContent = `Item ${item.itemNo}`;
-        $('transfer-karton-label').textContent = `${tp.name} (${tp.p}×${tp.l}×${tp.t}) — ${c.qty} krt`;
-        xfQtyEl.value = 1;
-        xfQtyEl.max = c.qty;
-
-        xfToEl.innerHTML = '';
-        items.forEach((it, i) => {
-            if (i === fromIdx) return;
-            const opt = document.createElement('option');
-            opt.value = i;
-            opt.textContent = `Item ${it.itemNo} (target: ${it.targetQty})`;
-            xfToEl.appendChild(opt);
-        });
-
-        updateTransferPreview();
-        xfOverlay.classList.add('active');
-        return new Promise(resolve => { xfResolver = resolve; });
-    }
-
-    function updateTransferPreview() {
-        if (!xfCtx) return;
-        const qty = pi(xfQtyEl.value);
-        const cbmPU = xfCtx.tp.qtyTotal > 0 ? xfCtx.tp.cbmTarget / xfCtx.tp.qtyTotal : xfCtx.tp.cbmPerUnit;
-        if (qty > 0 && qty <= xfCtx.maxQty) {
-            const toIdx = pi(xfToEl.value);
-            const toItem = items[toIdx];
-            xfPrev.innerHTML = `<i class="fa fa-arrow-right" style="margin-right:4px"></i> ${qty} krt (${(cbmPU * qty).toFixed(4)} CBM) → <b>Item ${toItem ? toItem.itemNo : '?'}</b>`;
-        } else {
-            xfPrev.textContent = qty > xfCtx.maxQty ? `Max: ${xfCtx.maxQty}` : 'Isi jumlah';
-        }
-    }
-
-    xfQtyEl.addEventListener('input', updateTransferPreview);
-    xfToEl.addEventListener('change', updateTransferPreview);
-
-    $('transfer-cancel').addEventListener('click', () => {
-        xfOverlay.classList.remove('active');
-        if (xfResolver) { xfResolver(false); xfResolver = null; }
-    });
-
-    $('transfer-ok').addEventListener('click', () => {
-        if (!xfCtx) return;
-        const qty = pi(xfQtyEl.value);
-        const toIdx = pi(xfToEl.value);
-        if (qty <= 0 || qty > xfCtx.maxQty || toIdx === xfCtx.fromIdx) return;
-
-        // Kurangi dari item asal
-        const srcCarton = items[xfCtx.fromIdx].cartons[xfCtx.ci];
-        srcCarton.qty -= qty;
-        if (srcCarton.qty <= 0) items[xfCtx.fromIdx].cartons.splice(xfCtx.ci, 1);
-
-        // Tambah ke item tujuan (merge jika tplId sama)
-        const dest = items[toIdx];
-        const existing = dest.cartons.find(c => c.tplId === xfCtx.tplId);
-        if (existing) existing.qty += qty;
-        else dest.cartons.push({ tplId: xfCtx.tplId, qty });
-
-        xfOverlay.classList.remove('active');
-        if (xfResolver) { xfResolver(true); xfResolver = null; }
-        renderAll();
-    });
-
 
     /** Build Map<tplId, template> for O(1) lookups */
     function buildTplMap() {
@@ -694,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tp = tplMap.get(c.tplId);
                 if (!tp) return;
                 const cbmPU = tp.qtyTotal > 0 ? tp.cbmTarget / tp.qtyTotal : tp.cbmPerUnit;
-                cRows += `<tr><td>${tp.p}×${tp.l}×${tp.t}</td><td>${c.qty}</td><td>${(cbmPU * c.qty).toFixed(4)}</td><td><button class="btn orange sm" data-xfer="${idx},${ci}" title="Transfer"><i class="fa fa-arrow-right-arrow-left"></i></button> <button class="btn red" data-del-cart="${idx},${ci}"><i class="fa fa-times"></i></button></td></tr>`;
+                cRows += `<tr><td>${tp.p}×${tp.l}×${tp.t}</td><td>${c.qty}</td><td>${(cbmPU * c.qty).toFixed(4)}</td><td><button class="btn red" data-del-cart="${idx},${ci}"><i class="fa fa-times"></i></button></td></tr>`;
             });
             const cbm = R2(rawCbm);
             const { cfr, fob, freight } = cfrFobAll[idx];
@@ -755,8 +682,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!btn) return;
         if (btn.dataset.delItem !== undefined) { items.splice(+btn.dataset.delItem, 1); items.forEach((it, i) => it.itemNo = i + 1); renderAll(); }
         else if (btn.dataset.delCart !== undefined) { const [a, c] = btn.dataset.delCart.split(',').map(Number); items[a].cartons.splice(c, 1); renderAll(); }
-        else if (btn.dataset.addCart !== undefined) manualAddDus(+btn.dataset.addCart)
-        else if (btn.dataset.xfer !== undefined) { const [a, c] = btn.dataset.xfer.split(',').map(Number); showTransferModal(a, c); }
+        else if (btn.dataset.addCart !== undefined) manualAddDus(+btn.dataset.addCart);
     });
 
     async function manualAddDus(idx) {
@@ -780,24 +706,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totT !== totA && !(await showConfirm(`⚠️ Target (${totT}) ≠ Template (${totA}). Lanjut?`))) return;
 
         // Group templates by P (panjang) dimension for marking-based allocation
-        const groups = new Map(); // P → [{ tplId, avail, tp }]
+        const groups = new Map(); // P → [{ tplId, avail, qtyTotal }]
         templates.forEach(tp => {
             const key = tp.p;
             if (!groups.has(key)) groups.set(key, []);
-            groups.get(key).push({ tplId: tp.id, avail: tp.qtyTotal, t: tp.t });
+            groups.get(key).push({ tplId: tp.id, avail: tp.qtyTotal });
         });
-        // Within each group: sort by T (height) descending — tallest cartons first
-        const groupArr = [...groups.values()];
-        groupArr.forEach(pool => pool.sort((a, b) => b.t - a.t));
-
-        // Sort items by targetQty descending (main items first), preserve original index for restore
-        const sortedItems = items.map((item, idx) => ({ item, idx, origNo: item.itemNo }))
-            .sort((a, b) => b.item.targetQty - a.item.targetQty);
+        const groupArr = [...groups.values()]; // array of pools, ordered by template input
 
         items.forEach(it => it.cartons = []);
-        let gIdx = 0;
-        sortedItems.forEach(({ item }) => {
+        let gIdx = 0; // current group index
+        items.forEach(item => {
             let need = item.targetQty;
+            // Try current group first; advance to next when exhausted
             while (need > 0 && gIdx < groupArr.length) {
                 const pool = groupArr[gIdx];
                 for (const sl of pool) {
@@ -807,11 +728,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     item.cartons.push({ tplId: sl.tplId, qty: take });
                     sl.avail -= take; need -= take;
                 }
-                if (pool.every(sl => sl.avail <= 0)) gIdx++;
-                else break;
+                if (pool.every(sl => sl.avail <= 0)) gIdx++; // group exhausted
+                else break; // group still has capacity
             }
         });
-        // Restore original item order (itemNo tidak berubah)
         renderAll();
         const left = groupArr.reduce((s, pool) => s + pool.reduce((s2, sl) => s2 + sl.avail, 0), 0);
         showAlert(left === 0 ? `✅ Semua karton teralokasi! (${groupArr.length} group P)` : `⚠️ Sisa ${left} karton tidak teralokasi.`, left === 0 ? 'success' : 'warning');

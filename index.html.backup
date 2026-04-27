@@ -264,30 +264,6 @@
         </div>
     </div>
 
-    <!-- ═══ MODAL: Transfer Karton ═══ -->
-    <div class="modal-overlay" id="modal-transfer-overlay">
-        <div class="modal-box modal-dus">
-            <h3><i class="fa-solid fa-arrow-right-arrow-left"></i> Transfer Karton</h3>
-            <div class="modal-field">
-                <label>Dari: <b id="transfer-from-label"></b></label>
-                <label>Karton: <b id="transfer-karton-label"></b></label>
-            </div>
-            <div class="modal-field">
-                <label for="transfer-qty">Jumlah yang dipindah:</label>
-                <input type="number" id="transfer-qty" min="1" value="1" placeholder="Qty">
-            </div>
-            <div class="modal-field">
-                <label for="transfer-to">Pindah ke:</label>
-                <select id="transfer-to"></select>
-            </div>
-            <div class="modal-dus-preview" id="transfer-preview"></div>
-            <div class="modal-actions">
-                <button class="btn modal-btn-cancel" id="transfer-cancel"><i class="fa fa-times"></i> Batal</button>
-                <button class="btn modal-btn-ok" id="transfer-ok"><i class="fa fa-arrow-right-arrow-left"></i> Transfer</button>
-            </div>
-        </div>
-    </div>
-
     <script src="script.js"></script>
 </body>
 
