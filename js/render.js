@@ -208,12 +208,11 @@ export function renderValidation() {
   if (warnEl) {
     const calcFr = R2(R2(aCbm) * pf(gPrice.value));
     const gFr = pf(gFreight.value);
-    if (gFr > 0 && aCbm > 0 && Math.abs(calcFr - gFr) > 1) {
-      warnEl.style.display = "block";
-      warnEl.innerHTML = `<i class="fa fa-triangle-exclamation"></i> Rate×CBM = $${fmt(calcFr)} ≠ Freight $${fmt(gFr)} (selisih $${fmt(Math.abs(calcFr - gFr))}). Effective rate: $${fmt(R2(gFr / aCbm))}/CBM`;
+    const showRateWarn = gFr > 0 && aCbm > 0 && Math.abs(calcFr - gFr) > 1;
+    warnEl.classList.toggle("hint-hidden", !showRateWarn);
+    if (showRateWarn) {
+      warnEl.innerHTML = `<i class="fa fa-triangle-exclamation" aria-hidden="true"></i> Rate×CBM = $${fmt(calcFr)} ≠ Freight $${fmt(gFr)} (selisih $${fmt(Math.abs(calcFr - gFr))}). Effective rate: $${fmt(R2(gFr / aCbm))}/CBM`;
       warnEl.style.color = "var(--orange)";
-    } else {
-      warnEl.style.display = "none";
     }
   }
 
@@ -229,13 +228,12 @@ export function renderValidation() {
         );
       }
     });
-    if (globalWarnings.length > 0) {
-      incoEl.style.display = "block";
+    const hasWarnings = globalWarnings.length > 0;
+    incoEl.classList.toggle("hint-hidden", !hasWarnings);
+    if (hasWarnings) {
       incoEl.innerHTML = globalWarnings
-        .map((w) => `<div class="inco-${w.level}"><i class="fa fa-${w.level === "error" ? "circle-xmark" : "triangle-exclamation"}"></i> ${w.msg}</div>`)
+        .map((w) => `<div class="inco-${w.level}"><i class="fa fa-${w.level === "error" ? "circle-xmark" : "triangle-exclamation"}" aria-hidden="true"></i> ${w.msg}</div>`)
         .join("");
-    } else {
-      incoEl.style.display = "none";
     }
   }
 }
