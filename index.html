@@ -14,6 +14,11 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
   <!-- Custom Styles -->
   <link rel="stylesheet" href="styles/style.css">
 </head>
@@ -23,21 +28,21 @@
   <main class="w-full max-w-7xl px-4 space-y-6">
     
     <!-- ══ HEADER ══ -->
-    <header class="navbar bg-base-100 shadow-md rounded-box px-6 py-3 mb-6 flex justify-between items-center">
-      <div class="flex items-center gap-4">
-        <div class="p-3 bg-primary text-primary-content rounded-lg">
+    <header class="navbar bg-base-100 shadow-md rounded-box px-4 sm:px-6 py-3 mb-6 flex flex-col sm:flex-row justify-between items-center gap-4 sm:gap-0">
+      <div class="flex items-center gap-4 w-full sm:w-auto">
+        <div class="p-3 bg-primary text-primary-content rounded-lg hidden sm:block">
           <i class="fa-solid fa-ship text-xl"></i>
         </div>
-        <div>
-          <h1 class="text-2xl font-bold text-base-content leading-tight">Kalkulator Draft PEB</h1>
-          <p class="text-sm text-base-content/70">Alokasi Otomatis Kubikasi, Freight, CFR & FOB per Item</p>
+        <div class="flex-1 text-center sm:text-left">
+          <h1 class="text-xl sm:text-2xl font-bold text-base-content leading-tight">Kalkulator Draft PEB</h1>
+          <p class="text-xs sm:text-sm text-base-content/70">Alokasi Otomatis Kubikasi, Freight, CFR & FOB</p>
         </div>
       </div>
-      <div>
-        <label class="swap swap-rotate btn btn-circle btn-ghost" id="btn-theme" title="Toggle Theme">
+      <div class="w-full sm:w-auto flex justify-center sm:justify-end">
+        <label class="swap swap-rotate btn btn-sm sm:btn-md btn-circle btn-ghost bg-base-200 sm:bg-transparent" id="btn-theme" title="Toggle Theme">
           <input type="checkbox" class="theme-controller" value="light" />
-          <i class="fa-solid fa-moon swap-off fill-current text-xl"></i>
-          <i class="fa-solid fa-sun swap-on fill-current text-xl"></i>
+          <i class="fa-solid fa-moon swap-off fill-current text-lg sm:text-xl"></i>
+          <i class="fa-solid fa-sun swap-on fill-current text-lg sm:text-xl"></i>
         </label>
       </div>
     </header>
@@ -49,31 +54,31 @@
           <i class="fa-solid fa-sliders text-primary"></i> 1. Data Acuan Global
         </h2>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div class="form-control">
             <label class="label"><span class="label-text font-semibold">Harga Freight / CBM ($)</span></label>
-            <label class="input input-bordered flex items-center gap-2">
+            <label class="input input-bordered flex items-center gap-2 focus-within:border-primary">
               <i class="fa-solid fa-dollar-sign text-base-content/50"></i>
               <input type="text" id="g-price" class="grow" value="85" inputmode="decimal" autocomplete="off" />
             </label>
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text font-semibold">Total Freight Global ($)</span></label>
-            <label class="input input-bordered flex items-center gap-2">
+            <label class="input input-bordered flex items-center gap-2 focus-within:border-primary">
               <i class="fa-solid fa-dollar-sign text-base-content/50"></i>
               <input type="text" id="g-freight" class="grow" placeholder="1103.30" inputmode="decimal" autocomplete="off" />
             </label>
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text font-semibold">Total CFR Global ($)</span></label>
-            <label class="input input-bordered flex items-center gap-2">
+            <label class="input input-bordered flex items-center gap-2 focus-within:border-primary">
               <i class="fa-solid fa-dollar-sign text-base-content/50"></i>
               <input type="text" id="g-cfr" class="grow" placeholder="24742.67" inputmode="decimal" autocomplete="off" />
             </label>
           </div>
           <div class="form-control">
             <label class="label"><span class="label-text font-semibold">Total FOB Global ($)</span></label>
-            <label class="input input-bordered flex items-center gap-2">
+            <label class="input input-bordered flex items-center gap-2 focus-within:border-primary">
               <i class="fa-solid fa-dollar-sign text-base-content/50"></i>
               <input type="text" id="g-fob" class="grow" placeholder="23639.37" inputmode="decimal" autocomplete="off" />
             </label>
@@ -99,52 +104,56 @@
         </h2>
 
         <!-- Input Form -->
-        <div class="bg-base-200 p-4 rounded-box mb-6 flex flex-wrap lg:flex-nowrap gap-3 items-end">
-          <div class="form-control w-full lg:w-auto flex-1">
-            <label class="label"><span class="label-text text-xs">Nama (Opsional)</span></label>
+        <div class="bg-base-200 p-4 rounded-box mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 items-end">
+          
+          <div class="form-control md:col-span-2 lg:col-span-3">
+            <label class="label py-1"><span class="label-text text-xs font-medium">Nama (Opsional)</span></label>
             <input type="text" id="tf-name" class="input input-bordered input-sm w-full" placeholder="Contoh: Dus A" autocomplete="off" />
           </div>
-          <div class="form-control w-1/4 lg:w-20">
-            <label class="label"><span class="label-text text-xs">P (cm)</span></label>
-            <input type="text" id="tf-p" class="input input-bordered input-sm w-full" placeholder="0" inputmode="decimal" />
-          </div>
-          <div class="flex items-center pb-2 text-base-content/50">×</div>
-          <div class="form-control w-1/4 lg:w-20">
-            <label class="label"><span class="label-text text-xs">L (cm)</span></label>
-            <input type="text" id="tf-l" class="input input-bordered input-sm w-full" placeholder="0" inputmode="decimal" />
-          </div>
-          <div class="flex items-center pb-2 text-base-content/50">×</div>
-          <div class="form-control w-1/4 lg:w-20">
-            <label class="label"><span class="label-text text-xs">T (cm)</span></label>
-            <input type="text" id="tf-t" class="input input-bordered input-sm w-full" placeholder="0" inputmode="decimal" />
-          </div>
-          <div class="form-control w-1/2 lg:w-28 ml-auto lg:ml-4">
-            <label class="label"><span class="label-text text-xs">Qty Karton</span></label>
-            <input type="number" id="tf-qty" class="input input-bordered input-sm w-full" placeholder="0" min="1" />
-          </div>
-          <div class="form-control w-1/2 lg:w-32">
-            <label class="label"><span class="label-text text-xs">Total CBM</span></label>
-            <input type="text" id="tf-cbm" class="input input-bordered input-sm w-full" placeholder="0.00" inputmode="decimal" />
+          
+          <div class="form-control md:col-span-2 lg:col-span-4">
+            <label class="label py-1"><span class="label-text text-xs font-medium">Dimensi: P × L × T (cm)</span></label>
+            <div class="flex items-center gap-2">
+              <input type="text" id="tf-p" class="input input-bordered input-sm w-full text-center" placeholder="P" inputmode="decimal" />
+              <span class="text-base-content/50 font-bold">×</span>
+              <input type="text" id="tf-l" class="input input-bordered input-sm w-full text-center" placeholder="L" inputmode="decimal" />
+              <span class="text-base-content/50 font-bold">×</span>
+              <input type="text" id="tf-t" class="input input-bordered input-sm w-full text-center" placeholder="T" inputmode="decimal" />
+            </div>
           </div>
           
-          <button class="btn btn-primary btn-sm ml-auto mt-4 lg:mt-0" id="btn-add-tpl" type="button">
-            <i class="fa-solid fa-plus"></i> Tambah
-          </button>
+          <div class="form-control lg:col-span-2">
+            <label class="label py-1"><span class="label-text text-xs font-medium">Qty Karton</span></label>
+            <input type="number" id="tf-qty" class="input input-bordered input-sm w-full text-right" placeholder="0" min="1" />
+          </div>
+          
+          <div class="form-control lg:col-span-2">
+            <label class="label py-1"><span class="label-text text-xs font-medium">Total CBM</span></label>
+            <input type="text" id="tf-cbm" class="input input-bordered input-sm w-full text-right" placeholder="0.00" inputmode="decimal" />
+          </div>
+          
+          <div class="form-control md:col-span-2 lg:col-span-1 mt-2 lg:mt-0">
+            <button class="btn btn-primary btn-sm w-full" id="btn-add-tpl" type="button" title="Tambah Template">
+              <i class="fa-solid fa-plus"></i> <span class="lg:hidden ml-2">Tambah</span>
+            </button>
+          </div>
+          
         </div>
         <div class="text-xs text-base-content/60 px-2 -mt-4 mb-4" id="tf-cbm-preview" aria-live="polite">Isi Qty atau CBM (salah satu)</div>
 
         <!-- Table -->
         <div class="overflow-x-auto border border-base-300 rounded-box">
-          <table class="table table-zebra table-sm w-full" id="tbl-tpl">
+          <table class="table table-zebra table-sm w-full whitespace-nowrap" id="tbl-tpl">
             <thead class="bg-base-200">
               <tr>
+                <th>Nama</th>
                 <th>Ukuran (P×L×T cm)</th>
                 <th>CBM/Unit</th>
-                <th>CBM Total</th>
-                <th>Qty Total</th>
+                <th class="text-right">CBM Total</th>
+                <th class="text-right">Qty Total</th>
                 <th>Sudah Dialokasi</th>
                 <th>Sisa</th>
-                <th class="w-12 text-center"><i class="fa-solid fa-gear"></i></th>
+                <th class="text-center"><i class="fa-solid fa-gear"></i></th>
               </tr>
             </thead>
             <tbody id="tpl-body"></tbody>
@@ -167,15 +176,15 @@
     <!-- ══ PANEL 3: ALOKASI BARANG ══ -->
     <section class="card bg-base-100 shadow-xl" id="panel-items">
       <div class="card-body p-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-2 mb-4 gap-4">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-3 mb-4 gap-4">
           <h2 class="card-title text-lg">
             <i class="fa-solid fa-list-check text-accent"></i> 3. Alokasi Per Item
           </h2>
-          <div class="flex gap-2">
-            <button class="btn btn-success btn-sm" id="btn-auto-solve" title="Bagi sisa template karton otomatis ke item yang kurang">
-              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Solve Alokasi
+          <div class="flex flex-wrap sm:flex-nowrap gap-2 w-full md:w-auto">
+            <button class="btn btn-outline btn-success btn-sm flex-1 sm:flex-none" id="btn-auto-solve" title="Bagi sisa template karton otomatis ke item yang kurang">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Solve
             </button>
-            <button class="btn btn-accent btn-sm text-white" id="btn-add-item">
+            <button class="btn btn-primary btn-sm flex-1 sm:flex-none shadow-sm" id="btn-add-item">
               <i class="fa-solid fa-plus"></i> Tambah Item
             </button>
           </div>
@@ -245,10 +254,10 @@
 
   </main>
 
-  <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-8 rounded-t-box max-w-7xl">
-    <aside>
-      <p>Kalkulator Draft PEB &copy; 2026 - Logistics Calculation Tool</p>
-    </aside>
+  <footer class="w-full max-w-7xl px-4 pb-8 pt-4">
+    <div class="text-center text-sm font-medium text-base-content/50">
+      Kalkulator Draft PEB &copy; 2026 - Logistics Calculation Tool
+    </div>
   </footer>
 
   <!-- ══ MODALS (DaisyUI) ══ -->
