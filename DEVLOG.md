@@ -195,6 +195,15 @@ SI/PL → Ukuran karton (P×L×T) + qty per template + qty target per item
 - **OCR dihapus:** Tesseract.js, pdf.js, paste zones, semua parser
 - **Lesson:** Pisahkan pure logic dari DOM — memungkinkan unit testing tanpa browser
 
+### 6. Implementasi Hare-Niemeyer (2026-04-30)
+
+- **Issue:** `Σ R2(freight_i) ≠ totalFreight` karena rounding independen per item
+- **Solusi:** `distributeProportional()` — Largest Remainder Method dari teori Apportionment
+- **Dampak:** Freight & FOB distribusi kini **exact** ke 2 desimal (Σ = total, selalu)
+- **FOB:** Ganti "dump remainder ke item terkecil" → distribusi proporsional (unbiased)
+- **Referensi:** Balinski & Young (2001), Dorfleitner & Klein (1999)
+- **File:** `REFERENCES.md` untuk daftar lengkap referensi keilmuan
+
 ---
 
 ## 📋 Conversation History Summary
@@ -217,6 +226,7 @@ SI/PL → Ukuran karton (P×L×T) + qty per template + qty target per item
 | 2026-04-30 | Analisis & fix akurasi perhitungan   | ✅                       |
 | 2026-04-30 | Restructure → 5 ES modules          | ✅                       |
 | 2026-04-30 | Hapus OCR (Tesseract/pdf.js)         | ✅                       |
+| 2026-04-30 | Hare-Niemeyer proportional freight    | ✅                       |
 
 ---
 
