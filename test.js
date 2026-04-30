@@ -46,6 +46,27 @@ function distributeProportional(total, weights) {
   return floors.map((f) => f / 100);
 }
 
+// ISO 80000-1:2022 Annex B — Round-half-to-even
+function roundHalfEven(value, decimals = 2) {
+  const factor = 10 ** decimals;
+  const shifted = value * factor;
+  const truncated = Math.trunc(shifted);
+  const remainder = Math.abs(shifted - truncated);
+  if (Math.abs(remainder - 0.5) > 1e-9) return Math.round(shifted) / factor;
+  if (truncated % 2 === 0) return truncated / factor;
+  return (truncated + Math.sign(shifted)) / factor;
+}
+
+// Incoterms® 2020 validation
+function validateIncoterms(cfr, fob, freight) {
+  const warnings = [];
+  if (fob < 0) warnings.push({ level: "error", msg: "FOB negatif" });
+  if (freight < 0) warnings.push({ level: "error", msg: "Freight negatif" });
+  if (cfr > 0 && fob > 0 && cfr < fob) warnings.push({ level: "warning", msg: "CFR < FOB" });
+  if (cfr > 0 && freight > 0 && freight >= cfr) warnings.push({ level: "error", msg: "Freight ≥ CFR" });
+  return warnings;
+}
+
 // ── Mini test framework ──
 let pass = 0, fail = 0, groupName = '';
 const RED = '\x1b[31m', GREEN = '\x1b[32m', DIM = '\x1b[2m', BOLD = '\x1b[1m', RESET = '\x1b[0m';
@@ -320,6 +341,57 @@ describe("TC14: distributeProportional() — Hare-Niemeyer", () => {
     const weights = [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 0.5];
     const result = distributeProportional(9999.99, weights);
     eq(result.reduce((s, v) => s + v, 0), 9999.99, "Sum exact");
+  });
+});
+
+describe("TC15: roundHalfEven() — ISO 80000-1:2022", () => {
+  it("Non-halfway: 5.674 → 5.67", () => eq(roundHalfEven(5.674), 5.67));
+  it("Non-halfway: 5.676 → 5.68", () => eq(roundHalfEven(5.676), 5.68));
+  it("Halfway even: 2.5 → 2 (even)", () => eq(roundHalfEven(2.5, 0), 2));
+  it("Halfway odd: 3.5 → 4 (even)", () => eq(roundHalfEven(3.5, 0), 4));
+  it("Halfway 2.25 → 2.2 (even)", () => eq(roundHalfEven(2.25, 1), 2.2));
+  it("Halfway 2.35 → 2.4 (even)", () => eq(roundHalfEven(2.35, 1), 2.4));
+  it("Negative halfway: -2.5 → -2 (even)", () => eq(roundHalfEven(-2.5, 0), -2));
+  it("Negative halfway: -3.5 → -4 (even)", () => eq(roundHalfEven(-3.5, 0), -4));
+  it("Zero → 0", () => eq(roundHalfEven(0), 0));
+  it("Large: 24742.675 → 24742.68", () => eq(roundHalfEven(24742.675), 24742.68));
+  it("vs R2(): R2 rounds half-up, ISO rounds half-even", () => {
+    // R2 works on 2 decimals; for integer-level: both round 2.50 → 2.50
+    // Difference shows at exact halves like x.xx5:
+    eq(roundHalfEven(2.5, 0), 2, "ISO 2.5→2 (even)");
+    eq(roundHalfEven(3.5, 0), 4, "ISO 3.5→4 (even)");
+    // R2 with EPSILON: 0.045 + ε rounds up
+    eq(R2(0.045), 0.05, "R2 rounds half-up at 2 decimals");
+  });
+});
+
+describe("TC16: validateIncoterms() — Incoterms® 2020", () => {
+  it("Valid: CFR=15000, FOB=14400, Freight=600 → no warnings", () => {
+    eq(validateIncoterms(15000, 14400, 600).length, 0);
+  });
+  it("FOB negatif → contains error", () => {
+    const w = validateIncoterms(100, -50, 150);
+    eq(w.some(x => x.level === "error" && x.msg.includes("FOB")), true);
+  });
+  it("Freight negatif → contains error", () => {
+    const w = validateIncoterms(100, 120, -20);
+    eq(w.some(x => x.level === "error" && x.msg.includes("Freight")), true);
+  });
+  it("CFR < FOB → warning", () => {
+    const w = validateIncoterms(100, 200, 50);
+    eq(w.some(x => x.level === "warning"), true);
+  });
+  it("Freight ≥ CFR → error", () => {
+    const w = validateIncoterms(100, 0, 150);
+    eq(w.some(x => x.level === "error"), true);
+  });
+  it("Zero values → no warnings", () => {
+    eq(validateIncoterms(0, 0, 0).length, 0);
+  });
+  it("Multiple violations → multiple warnings", () => {
+    const w = validateIncoterms(100, -50, 200);
+    // FOB negatif + Freight >= CFR = 2 errors
+    eq(w.length >= 2, true);
   });
 });
 
