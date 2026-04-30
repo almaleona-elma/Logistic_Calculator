@@ -5,17 +5,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description"
-    content="Kalkulator Draft PEB - Alokasi otomatis kubikasi, freight, CFR & FOB per item pengiriman. Mendukung OCR dari screenshot dan PDF.">
+    content="Kalkulator Draft PEB - Alokasi otomatis kubikasi, freight, CFR & FOB per item pengiriman.">
   <title>Kalkulator PEB - Alokasi Freight & FOB</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  </script>
 </head>
 
 <body>
@@ -24,7 +19,7 @@
   <div class="app">
     <header class="app-header">
       <h1><i class="fa-solid fa-ship"></i> Kalkulator Draft PEB</h1>
-      <p>Alokasi Otomatis Kubikasi, Freight, CFR & FOB per Item — Paste Screenshot / Upload PDF</p>
+      <p>Alokasi Otomatis Kubikasi, Freight, CFR & FOB per Item</p>
       <button class="theme-toggle" id="btn-theme" title="Toggle Dark/Light Mode">
         <i class="fa-solid fa-moon"></i>
       </button>
@@ -33,20 +28,6 @@
     <!-- ═══ PANEL 1: GLOBAL ═══ -->
     <section class="card" id="panel-global">
       <h2><i class="fa-solid fa-sliders"></i> 1. Data Acuan Global</h2>
-
-      <!-- PASTE ZONE: FOB & Freight -->
-      <div class="paste-zone" data-zone="global">
-        <div class="paste-drop" data-zone="global">
-          <i class="fa-solid fa-paste"></i>
-          <span><strong>Paste screenshot</strong> FOB & Freight di sini (Ctrl+V) atau <label class="file-label">upload
-              <input type="file" accept=".pdf,image/*" data-zone="global" hidden></label></span>
-        </div>
-        <div class="paste-status" id="status-global" style="display:none">
-          <div class="paste-bar">
-            <div class="paste-bar-fill" id="bar-global"></div><span id="msg-global"></span>
-          </div>
-        </div>
-      </div>
 
       <div class="row-4">
         <div class="field">
@@ -75,45 +56,7 @@
     <section class="card" id="panel-templates">
       <h2><i class="fa-solid fa-boxes-stacked"></i> 2. Master Measurement (Ukuran Karton)</h2>
 
-      <!-- PASTE ZONE: Measurement -->
-      <div class="paste-zone" data-zone="measurement">
-        <div class="paste-drop" data-zone="measurement">
-          <i class="fa-solid fa-paste"></i>
-          <span><strong>Paste screenshot</strong> Measurement (PxLxT + CBM) di sini (Ctrl+V) atau <label
-              class="file-label">upload <input type="file" accept=".pdf,image/*" data-zone="measurement"
-                hidden></label></span>
-        </div>
-        <div class="paste-status" id="status-measurement" style="display:none">
-          <div class="paste-bar">
-            <div class="paste-bar-fill" id="bar-measurement"></div><span id="msg-measurement"></span>
-          </div>
-        </div>
-        <div class="paste-results" id="results-measurement" style="display:none">
-          <div class="paste-results-head">
-            <h4><i class="fa-solid fa-wand-magic-sparkles"></i> <span id="count-measurement">0</span> ukuran
-              terdeteksi</h4>
-            <div>
-              <button class="btn green" data-apply="measurement"><i class="fa fa-check"></i>
-                Terapkan</button>
-              <button class="btn red" data-clear="measurement"><i class="fa fa-times"></i></button>
-            </div>
-          </div>
-          <table class="tbl">
-            <thead>
-              <tr>
-                <th>✓</th>
-                <th>P</th>
-                <th>L</th>
-                <th>T</th>
-                <th>CBM</th>
-              </tr>
-            </thead>
-            <tbody id="tbody-measurement"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <h3 class="manual-label"><i class="fa-solid fa-keyboard"></i> Atau Input Manual:</h3>
+      <h3 class="manual-label"><i class="fa-solid fa-keyboard"></i> Input Manual:</h3>
       <div class="tpl-form" id="tpl-form">
         <input type="text" id="tf-name" placeholder="Nama (opsional)">
         <input type="text" id="tf-p" placeholder="P (cm)" inputmode="decimal" required>
@@ -163,46 +106,6 @@
         </div>
       </div>
 
-      <!-- PASTE ZONES: Item Count + CFR -->
-      <div class="paste-row">
-        <div class="paste-zone" data-zone="items">
-          <div class="paste-drop" data-zone="items">
-            <i class="fa-solid fa-paste"></i>
-            <span><strong>Paste</strong> screenshot jumlah ITEM & karton</span>
-          </div>
-          <div class="paste-status" id="status-items" style="display:none">
-            <div class="paste-bar">
-              <div class="paste-bar-fill" id="bar-items"></div><span id="msg-items"></span>
-            </div>
-          </div>
-          <div class="paste-results" id="results-items" style="display:none">
-            <div class="paste-results-head">
-              <h4><span id="count-items">0</span> item terdeteksi</h4>
-              <button class="btn green" data-apply="items"><i class="fa fa-check"></i></button>
-            </div>
-            <div id="preview-items"></div>
-          </div>
-        </div>
-        <div class="paste-zone" data-zone="cfr">
-          <div class="paste-drop" data-zone="cfr">
-            <i class="fa-solid fa-paste"></i>
-            <span><strong>Paste</strong> screenshot Amount USD / CFR per item</span>
-          </div>
-          <div class="paste-status" id="status-cfr" style="display:none">
-            <div class="paste-bar">
-              <div class="paste-bar-fill" id="bar-cfr"></div><span id="msg-cfr"></span>
-            </div>
-          </div>
-          <div class="paste-results" id="results-cfr" style="display:none">
-            <div class="paste-results-head">
-              <h4><span id="count-cfr">0</span> nilai terdeteksi</h4>
-              <button class="btn green" data-apply="cfr"><i class="fa fa-check"></i></button>
-            </div>
-            <div id="preview-cfr"></div>
-          </div>
-        </div>
-      </div>
-
       <div id="items-wrap"></div>
     </section>
 
@@ -238,6 +141,7 @@
       </div>
     </section>
   </div>
+
   <!-- ═══ MODAL: Custom Alert / Confirm ═══ -->
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal-box" id="modal-box">
@@ -291,7 +195,7 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 
 </html>
