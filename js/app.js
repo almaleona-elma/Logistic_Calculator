@@ -274,45 +274,42 @@ $("btn-auto-solve").addEventListener("click", async () => {
 });
 
 // ══════════════════════════════════════════════
-//  COPY & RESET
+//  RESET
 // ══════════════════════════════════════════════
-$("btn-copy-result").addEventListener("click", () => {
-  navigator.clipboard
-    .writeText(buildResultText())
-    .then(() => showAlert("✅ Hasil disalin ke clipboard!"));
-});
-
-$("btn-reset-all").addEventListener("click", async () => {
-  if (!(await showConfirm("⚠️ Reset semua data? Semua template, item, dan nilai global akan dihapus."))) return;
-  resetState();
-  gFreight.value = "";
-  gCfr.value = "";
-  gFob.value = "";
-  gPrice.value = "85";
-  setGlobalLastEdited("");
-  updateGlobal();
-  renderAll();
-});
+const btnReset = $("btn-reset");
+if (btnReset) {
+  btnReset.addEventListener("click", async () => {
+    if (!(await showConfirm("⚠️ Reset semua data? Semua template, item, dan nilai global akan dihapus."))) return;
+    resetState();
+    gFreight.value = "";
+    gCfr.value = "";
+    gFob.value = "";
+    gPrice.value = "85";
+    setGlobalLastEdited("");
+    updateGlobal();
+    renderAll();
+  });
+}
 
 // ══════════════════════════════════════════════
 //  THEME TOGGLE
 // ══════════════════════════════════════════════
 const THEME_KEY = "kalkulatorPEB_theme";
-const btnTheme = $("btn-theme");
-const themeIcon = btnTheme.querySelector("i");
+const themeController = document.querySelector(".theme-controller");
 
-function applyTheme(theme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  themeIcon.className = theme === "dark" ? "fa-solid fa-sun" : "fa-solid fa-moon";
+if (themeController) {
+  // Load saved theme
+  const savedTheme = localStorage.getItem(THEME_KEY) || "cmyk";
+  document.documentElement.setAttribute("data-theme", savedTheme);
+  themeController.checked = savedTheme === "business";
+
+  // Listen for changes
+  themeController.addEventListener("change", (e) => {
+    const nextTheme = e.target.checked ? "business" : "cmyk";
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    localStorage.setItem(THEME_KEY, nextTheme);
+  });
 }
-
-applyTheme(localStorage.getItem(THEME_KEY) || "light");
-
-btnTheme.addEventListener("click", () => {
-  const next = (document.documentElement.getAttribute("data-theme") || "light") === "dark" ? "light" : "dark";
-  applyTheme(next);
-  localStorage.setItem(THEME_KEY, next);
-});
 
 // ══════════════════════════════════════════════
 //  INIT
