@@ -2,293 +2,295 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Kalkulator Draft PEB - Alokasi otomatis kubikasi, freight, CFR & FOB per item pengiriman. Mendukung OCR dari screenshot dan PDF.">
-    <title>Kalkulator PEB - Alokasi Freight & FOB</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="Kalkulator Draft PEB - Alokasi otomatis kubikasi, freight, CFR & FOB per item pengiriman. Mendukung OCR dari screenshot dan PDF.">
+  <title>Kalkulator PEB - Alokasi Freight & FOB</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
 </head>
 
 <body>
-    <div class="bg-glow"></div>
+  <div class="bg-glow"></div>
 
-    <div class="app">
-        <header class="app-header">
-            <h1><i class="fa-solid fa-ship"></i> Kalkulator Draft PEB</h1>
-            <p>Alokasi Otomatis Kubikasi, Freight, CFR & FOB per Item — Paste Screenshot / Upload PDF</p>
-            <button class="theme-toggle" id="btn-theme" title="Toggle Dark/Light Mode">
-                <i class="fa-solid fa-moon"></i>
-            </button>
-        </header>
+  <div class="app">
+    <header class="app-header">
+      <h1><i class="fa-solid fa-ship"></i> Kalkulator Draft PEB</h1>
+      <p>Alokasi Otomatis Kubikasi, Freight, CFR & FOB per Item — Paste Screenshot / Upload PDF</p>
+      <button class="theme-toggle" id="btn-theme" title="Toggle Dark/Light Mode">
+        <i class="fa-solid fa-moon"></i>
+      </button>
+    </header>
 
-        <!-- ═══ PANEL 1: GLOBAL ═══ -->
-        <section class="card" id="panel-global">
-            <h2><i class="fa-solid fa-sliders"></i> 1. Data Acuan Global</h2>
+    <!-- ═══ PANEL 1: GLOBAL ═══ -->
+    <section class="card" id="panel-global">
+      <h2><i class="fa-solid fa-sliders"></i> 1. Data Acuan Global</h2>
 
-            <!-- PASTE ZONE: FOB & Freight -->
-            <div class="paste-zone" data-zone="global">
-                <div class="paste-drop" data-zone="global">
-                    <i class="fa-solid fa-paste"></i>
-                    <span><strong>Paste screenshot</strong> FOB & Freight di sini (Ctrl+V) atau <label
-                            class="file-label">upload <input type="file" accept=".pdf,image/*" data-zone="global"
-                                hidden></label></span>
-                </div>
-                <div class="paste-status" id="status-global" style="display:none">
-                    <div class="paste-bar">
-                        <div class="paste-bar-fill" id="bar-global"></div><span id="msg-global"></span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row-4">
-                <div class="field">
-                    <label>Harga Freight / CBM ($)</label>
-                    <input type="text" id="g-price" value="85" inputmode="decimal">
-                </div>
-                <div class="field">
-                    <label>Total Freight Global ($)</label>
-                    <input type="text" id="g-freight" placeholder="1103.30" inputmode="decimal">
-                </div>
-                <div class="field">
-                    <label>Total CFR Global ($)</label>
-                    <input type="text" id="g-cfr" placeholder="24742.67" inputmode="decimal">
-                </div>
-                <div class="field">
-                    <label>Total FOB Global ($)</label>
-                    <input type="text" id="g-fob" placeholder="23639.37" inputmode="decimal">
-                </div>
-            </div>
-            <div class="auto-cbm" id="g-calc-hint" style="margin-top:8px">Isi 2 dari 3: Freight, CFR, FOB — yang ke-3 otomatis terhitung</div>
-        </section>
-
-        <!-- ═══ PANEL 2: MASTER TEMPLATE KARTON ═══ -->
-        <section class="card" id="panel-templates">
-            <h2><i class="fa-solid fa-boxes-stacked"></i> 2. Master Measurement (Ukuran Karton)</h2>
-
-            <!-- PASTE ZONE: Measurement -->
-            <div class="paste-zone" data-zone="measurement">
-                <div class="paste-drop" data-zone="measurement">
-                    <i class="fa-solid fa-paste"></i>
-                    <span><strong>Paste screenshot</strong> Measurement (PxLxT + CBM) di sini (Ctrl+V) atau <label
-                            class="file-label">upload <input type="file" accept=".pdf,image/*" data-zone="measurement"
-                                hidden></label></span>
-                </div>
-                <div class="paste-status" id="status-measurement" style="display:none">
-                    <div class="paste-bar">
-                        <div class="paste-bar-fill" id="bar-measurement"></div><span id="msg-measurement"></span>
-                    </div>
-                </div>
-                <div class="paste-results" id="results-measurement" style="display:none">
-                    <div class="paste-results-head">
-                        <h4><i class="fa-solid fa-wand-magic-sparkles"></i> <span id="count-measurement">0</span> ukuran
-                            terdeteksi</h4>
-                        <div>
-                            <button class="btn green" data-apply="measurement"><i class="fa fa-check"></i>
-                                Terapkan</button>
-                            <button class="btn red" data-clear="measurement"><i class="fa fa-times"></i></button>
-                        </div>
-                    </div>
-                    <table class="tbl">
-                        <thead>
-                            <tr>
-                                <th>✓</th>
-                                <th>P</th>
-                                <th>L</th>
-                                <th>T</th>
-                                <th>CBM</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tbody-measurement"></tbody>
-                    </table>
-                </div>
-            </div>
-
-            <h3 class="manual-label"><i class="fa-solid fa-keyboard"></i> Atau Input Manual:</h3>
-            <div class="tpl-form" id="tpl-form">
-                <input type="text" id="tf-name" placeholder="Nama (opsional)">
-                <input type="text" id="tf-p" placeholder="P (cm)" inputmode="decimal" required>
-                <input type="text" id="tf-l" placeholder="L (cm)" inputmode="decimal" required>
-                <input type="text" id="tf-t" placeholder="T (cm)" inputmode="decimal" required>
-                <input type="number" id="tf-qty" placeholder="Qty Karton" min="1">
-                <input type="text" id="tf-cbm" placeholder="CBM Total" inputmode="decimal">
-                <div class="auto-cbm" id="tf-cbm-preview">Isi Qty atau CBM</div>
-                <button class="btn blue" id="btn-add-tpl"><i class="fa-solid fa-plus"></i> Tambah</button>
-            </div>
-
-            <table class="tbl" id="tbl-tpl">
-                <thead>
-                    <tr>
-                        <th>Ukuran (P×L×T cm)</th>
-                        <th>CBM/Unit</th>
-                        <th>CBM Total</th>
-                        <th>Qty Total</th>
-                        <th>Sudah Dialokasi</th>
-                        <th>Sisa</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody id="tpl-body"></tbody>
-                <tfoot>
-                    <tr class="tfoot-row">
-                        <td><strong>GRAND TOTAL</strong></td>
-                        <td></td>
-                        <td id="tpl-sum-cbm">0.00</td>
-                        <td id="tpl-sum-qty">0</td>
-                        <td id="tpl-sum-alloc">0</td>
-                        <td id="tpl-sum-sisa">0</td>
-                        <td></td>
-                    </tr>
-                </tfoot>
-            </table>
-        </section>
-
-        <!-- ═══ PANEL 3: ITEM ALLOCATION ═══ -->
-        <section class="card" id="panel-items">
-            <div class="card-head">
-                <h2><i class="fa-solid fa-list-ol"></i> 3. Alokasi Item (Draft PEB)</h2>
-                <div class="head-actions">
-                    <button class="btn green" id="btn-add-item"><i class="fa-solid fa-plus"></i> Tambah Item</button>
-                    <button class="btn orange" id="btn-auto-solve"><i class="fa-solid fa-wand-magic-sparkles"></i>
-                        AUTO-SOLVE</button>
-                </div>
-            </div>
-
-            <!-- PASTE ZONES: Item Count + CFR -->
-            <div class="paste-row">
-                <div class="paste-zone" data-zone="items">
-                    <div class="paste-drop" data-zone="items">
-                        <i class="fa-solid fa-paste"></i>
-                        <span><strong>Paste</strong> screenshot jumlah ITEM & karton</span>
-                    </div>
-                    <div class="paste-status" id="status-items" style="display:none">
-                        <div class="paste-bar">
-                            <div class="paste-bar-fill" id="bar-items"></div><span id="msg-items"></span>
-                        </div>
-                    </div>
-                    <div class="paste-results" id="results-items" style="display:none">
-                        <div class="paste-results-head">
-                            <h4><span id="count-items">0</span> item terdeteksi</h4>
-                            <button class="btn green" data-apply="items"><i class="fa fa-check"></i></button>
-                        </div>
-                        <div id="preview-items"></div>
-                    </div>
-                </div>
-                <div class="paste-zone" data-zone="cfr">
-                    <div class="paste-drop" data-zone="cfr">
-                        <i class="fa-solid fa-paste"></i>
-                        <span><strong>Paste</strong> screenshot Amount USD / CFR per item</span>
-                    </div>
-                    <div class="paste-status" id="status-cfr" style="display:none">
-                        <div class="paste-bar">
-                            <div class="paste-bar-fill" id="bar-cfr"></div><span id="msg-cfr"></span>
-                        </div>
-                    </div>
-                    <div class="paste-results" id="results-cfr" style="display:none">
-                        <div class="paste-results-head">
-                            <h4><span id="count-cfr">0</span> nilai terdeteksi</h4>
-                            <button class="btn green" data-apply="cfr"><i class="fa fa-check"></i></button>
-                        </div>
-                        <div id="preview-cfr"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="items-wrap"></div>
-        </section>
-
-        <!-- ═══ PANEL 4: VALIDATION ═══ -->
-        <section class="card validation-panel" id="panel-valid">
-            <h2><i class="fa-solid fa-check-double"></i> Rekapitulasi & Validasi</h2>
-            <div class="val-grid">
-                <div class="vc" id="vc-cbm">
-                    <div class="vc-head">Total CBM <span class="tag" id="tag-cbm">—</span></div>
-                    <div class="vc-row"><span>Aktual:</span><b id="va-cbm">0.00</b></div>
-                    <div class="vc-row"><span>Target:</span><b id="vt-cbm">0.00</b></div>
-                </div>
-                <div class="vc" id="vc-freight">
-                    <div class="vc-head">Total Freight <span class="tag" id="tag-freight">—</span></div>
-                    <div class="vc-row"><span>Aktual:</span><b id="va-freight">$ 0.00</b></div>
-                    <div class="vc-row"><span>Target:</span><b id="vt-freight">$ 0.00</b></div>
-                </div>
-                <div class="vc" id="vc-cfr">
-                    <div class="vc-head">Total CFR <span class="tag" id="tag-cfr">—</span></div>
-                    <div class="vc-row"><span>Aktual:</span><b id="va-cfr">$ 0.00</b></div>
-                    <div class="vc-row"><span>Target:</span><b id="vt-cfr">$ 0.00</b></div>
-                </div>
-                <div class="vc" id="vc-fob">
-                    <div class="vc-head">Total FOB <span class="tag" id="tag-fob">—</span></div>
-                    <div class="vc-row"><span>Aktual:</span><b id="va-fob">$ 0.00</b></div>
-                    <div class="vc-row"><span>Target:</span><b id="vt-fob">$ 0.00</b></div>
-                </div>
-            </div>
-            <div class="export-actions">
-                <button class="btn blue" id="btn-copy-result"><i class="fa-solid fa-copy"></i> Copy Hasil ke Clipboard</button>
-                <button class="btn red" id="btn-reset-all" style="padding:8px 14px;font-size:13px"><i class="fa-solid fa-rotate-left"></i> Reset Semua</button>
-            </div>
-        </section>
-    </div>
-    <!-- ═══ MODAL: Custom Alert / Confirm ═══ -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal-box" id="modal-box">
-            <div class="modal-icon" id="modal-icon"></div>
-            <div class="modal-message" id="modal-message"></div>
-            <div class="modal-actions" id="modal-actions"></div>
+      <!-- PASTE ZONE: FOB & Freight -->
+      <div class="paste-zone" data-zone="global">
+        <div class="paste-drop" data-zone="global">
+          <i class="fa-solid fa-paste"></i>
+          <span><strong>Paste screenshot</strong> FOB & Freight di sini (Ctrl+V) atau <label class="file-label">upload
+              <input type="file" accept=".pdf,image/*" data-zone="global" hidden></label></span>
         </div>
-    </div>
-
-    <!-- ═══ MODAL: Pilih Dus ═══ -->
-    <div class="modal-overlay" id="modal-dus-overlay">
-        <div class="modal-box modal-dus">
-            <h3><i class="fa-solid fa-box"></i> Tambah Karton</h3>
-            <div class="modal-field">
-                <label for="modal-dus-select">Pilih Ukuran Dus:</label>
-                <select id="modal-dus-select"></select>
-            </div>
-            <div class="modal-field">
-                <label for="modal-dus-qty">Jumlah (Qty):</label>
-                <input type="number" id="modal-dus-qty" min="1" value="1" placeholder="Qty">
-            </div>
-            <div class="modal-dus-preview" id="modal-dus-preview"></div>
-            <div class="modal-actions">
-                <button class="btn modal-btn-cancel" id="modal-dus-cancel"><i class="fa fa-times"></i> Batal</button>
-                <button class="btn modal-btn-ok" id="modal-dus-ok"><i class="fa fa-plus"></i> Tambah</button>
-            </div>
+        <div class="paste-status" id="status-global" style="display:none">
+          <div class="paste-bar">
+            <div class="paste-bar-fill" id="bar-global"></div><span id="msg-global"></span>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- ═══ MODAL: Transfer Karton ═══ -->
-    <div class="modal-overlay" id="modal-transfer-overlay">
-        <div class="modal-box modal-dus">
-            <h3><i class="fa-solid fa-arrow-right-arrow-left"></i> Transfer Karton</h3>
-            <div class="modal-field">
-                <label>Dari: <b id="transfer-from-label"></b></label>
-                <label>Karton: <b id="transfer-karton-label"></b></label>
-            </div>
-            <div class="modal-field">
-                <label for="transfer-qty">Jumlah yang dipindah:</label>
-                <input type="number" id="transfer-qty" min="1" value="1" placeholder="Qty">
-            </div>
-            <div class="modal-field">
-                <label for="transfer-to">Pindah ke:</label>
-                <select id="transfer-to"></select>
-            </div>
-            <div class="modal-dus-preview" id="transfer-preview"></div>
-            <div class="modal-actions">
-                <button class="btn modal-btn-cancel" id="transfer-cancel"><i class="fa fa-times"></i> Batal</button>
-                <button class="btn modal-btn-ok" id="transfer-ok"><i class="fa fa-arrow-right-arrow-left"></i> Transfer</button>
-            </div>
+      <div class="row-4">
+        <div class="field">
+          <label>Harga Freight / CBM ($)</label>
+          <input type="text" id="g-price" value="85" inputmode="decimal">
         </div>
-    </div>
+        <div class="field">
+          <label>Total Freight Global ($)</label>
+          <input type="text" id="g-freight" placeholder="1103.30" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>Total CFR Global ($)</label>
+          <input type="text" id="g-cfr" placeholder="24742.67" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>Total FOB Global ($)</label>
+          <input type="text" id="g-fob" placeholder="23639.37" inputmode="decimal">
+        </div>
+      </div>
+      <div class="auto-cbm" id="g-calc-hint" style="margin-top:8px">Isi 2 dari 3: Freight, CFR, FOB — yang ke-3 otomatis
+        terhitung</div>
+    </section>
 
-    <script src="script.js"></script>
+    <!-- ═══ PANEL 2: MASTER TEMPLATE KARTON ═══ -->
+    <section class="card" id="panel-templates">
+      <h2><i class="fa-solid fa-boxes-stacked"></i> 2. Master Measurement (Ukuran Karton)</h2>
+
+      <!-- PASTE ZONE: Measurement -->
+      <div class="paste-zone" data-zone="measurement">
+        <div class="paste-drop" data-zone="measurement">
+          <i class="fa-solid fa-paste"></i>
+          <span><strong>Paste screenshot</strong> Measurement (PxLxT + CBM) di sini (Ctrl+V) atau <label
+              class="file-label">upload <input type="file" accept=".pdf,image/*" data-zone="measurement"
+                hidden></label></span>
+        </div>
+        <div class="paste-status" id="status-measurement" style="display:none">
+          <div class="paste-bar">
+            <div class="paste-bar-fill" id="bar-measurement"></div><span id="msg-measurement"></span>
+          </div>
+        </div>
+        <div class="paste-results" id="results-measurement" style="display:none">
+          <div class="paste-results-head">
+            <h4><i class="fa-solid fa-wand-magic-sparkles"></i> <span id="count-measurement">0</span> ukuran
+              terdeteksi</h4>
+            <div>
+              <button class="btn green" data-apply="measurement"><i class="fa fa-check"></i>
+                Terapkan</button>
+              <button class="btn red" data-clear="measurement"><i class="fa fa-times"></i></button>
+            </div>
+          </div>
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th>✓</th>
+                <th>P</th>
+                <th>L</th>
+                <th>T</th>
+                <th>CBM</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-measurement"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <h3 class="manual-label"><i class="fa-solid fa-keyboard"></i> Atau Input Manual:</h3>
+      <div class="tpl-form" id="tpl-form">
+        <input type="text" id="tf-name" placeholder="Nama (opsional)">
+        <input type="text" id="tf-p" placeholder="P (cm)" inputmode="decimal" required>
+        <input type="text" id="tf-l" placeholder="L (cm)" inputmode="decimal" required>
+        <input type="text" id="tf-t" placeholder="T (cm)" inputmode="decimal" required>
+        <input type="number" id="tf-qty" placeholder="Qty Karton" min="1">
+        <input type="text" id="tf-cbm" placeholder="CBM Total" inputmode="decimal">
+        <div class="auto-cbm" id="tf-cbm-preview">Isi Qty atau CBM</div>
+        <button class="btn blue" id="btn-add-tpl"><i class="fa-solid fa-plus"></i> Tambah</button>
+      </div>
+
+      <table class="tbl" id="tbl-tpl">
+        <thead>
+          <tr>
+            <th>Ukuran (P×L×T cm)</th>
+            <th>CBM/Unit</th>
+            <th>CBM Total</th>
+            <th>Qty Total</th>
+            <th>Sudah Dialokasi</th>
+            <th>Sisa</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tpl-body"></tbody>
+        <tfoot>
+          <tr class="tfoot-row">
+            <td><strong>GRAND TOTAL</strong></td>
+            <td></td>
+            <td id="tpl-sum-cbm">0.00</td>
+            <td id="tpl-sum-qty">0</td>
+            <td id="tpl-sum-alloc">0</td>
+            <td id="tpl-sum-sisa">0</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    <!-- ═══ PANEL 3: ITEM ALLOCATION ═══ -->
+    <section class="card" id="panel-items">
+      <div class="card-head">
+        <h2><i class="fa-solid fa-list-ol"></i> 3. Alokasi Item (Draft PEB)</h2>
+        <div class="head-actions">
+          <button class="btn green" id="btn-add-item"><i class="fa-solid fa-plus"></i> Tambah Item</button>
+          <button class="btn orange" id="btn-auto-solve"><i class="fa-solid fa-wand-magic-sparkles"></i>
+            AUTO-SOLVE</button>
+        </div>
+      </div>
+
+      <!-- PASTE ZONES: Item Count + CFR -->
+      <div class="paste-row">
+        <div class="paste-zone" data-zone="items">
+          <div class="paste-drop" data-zone="items">
+            <i class="fa-solid fa-paste"></i>
+            <span><strong>Paste</strong> screenshot jumlah ITEM & karton</span>
+          </div>
+          <div class="paste-status" id="status-items" style="display:none">
+            <div class="paste-bar">
+              <div class="paste-bar-fill" id="bar-items"></div><span id="msg-items"></span>
+            </div>
+          </div>
+          <div class="paste-results" id="results-items" style="display:none">
+            <div class="paste-results-head">
+              <h4><span id="count-items">0</span> item terdeteksi</h4>
+              <button class="btn green" data-apply="items"><i class="fa fa-check"></i></button>
+            </div>
+            <div id="preview-items"></div>
+          </div>
+        </div>
+        <div class="paste-zone" data-zone="cfr">
+          <div class="paste-drop" data-zone="cfr">
+            <i class="fa-solid fa-paste"></i>
+            <span><strong>Paste</strong> screenshot Amount USD / CFR per item</span>
+          </div>
+          <div class="paste-status" id="status-cfr" style="display:none">
+            <div class="paste-bar">
+              <div class="paste-bar-fill" id="bar-cfr"></div><span id="msg-cfr"></span>
+            </div>
+          </div>
+          <div class="paste-results" id="results-cfr" style="display:none">
+            <div class="paste-results-head">
+              <h4><span id="count-cfr">0</span> nilai terdeteksi</h4>
+              <button class="btn green" data-apply="cfr"><i class="fa fa-check"></i></button>
+            </div>
+            <div id="preview-cfr"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="items-wrap"></div>
+    </section>
+
+    <!-- ═══ PANEL 4: VALIDATION ═══ -->
+    <section class="card validation-panel" id="panel-valid">
+      <h2><i class="fa-solid fa-check-double"></i> Rekapitulasi & Validasi</h2>
+      <div class="val-grid">
+        <div class="vc" id="vc-cbm">
+          <div class="vc-head">Total CBM <span class="tag" id="tag-cbm">—</span></div>
+          <div class="vc-row"><span>Aktual:</span><b id="va-cbm">0.00</b></div>
+          <div class="vc-row"><span>Target:</span><b id="vt-cbm">0.00</b></div>
+        </div>
+        <div class="vc" id="vc-freight">
+          <div class="vc-head">Total Freight <span class="tag" id="tag-freight">—</span></div>
+          <div class="vc-row"><span>Aktual:</span><b id="va-freight">$ 0.00</b></div>
+          <div class="vc-row"><span>Target:</span><b id="vt-freight">$ 0.00</b></div>
+        </div>
+        <div class="vc" id="vc-cfr">
+          <div class="vc-head">Total CFR <span class="tag" id="tag-cfr">—</span></div>
+          <div class="vc-row"><span>Aktual:</span><b id="va-cfr">$ 0.00</b></div>
+          <div class="vc-row"><span>Target:</span><b id="vt-cfr">$ 0.00</b></div>
+        </div>
+        <div class="vc" id="vc-fob">
+          <div class="vc-head">Total FOB <span class="tag" id="tag-fob">—</span></div>
+          <div class="vc-row"><span>Aktual:</span><b id="va-fob">$ 0.00</b></div>
+          <div class="vc-row"><span>Target:</span><b id="vt-fob">$ 0.00</b></div>
+        </div>
+      </div>
+      <div class="export-actions">
+        <button class="btn blue" id="btn-copy-result"><i class="fa-solid fa-copy"></i> Copy Hasil ke Clipboard</button>
+        <button class="btn red" id="btn-reset-all" style="padding:8px 14px;font-size:13px"><i
+            class="fa-solid fa-rotate-left"></i> Reset Semua</button>
+      </div>
+    </section>
+  </div>
+  <!-- ═══ MODAL: Custom Alert / Confirm ═══ -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box" id="modal-box">
+      <div class="modal-icon" id="modal-icon"></div>
+      <div class="modal-message" id="modal-message"></div>
+      <div class="modal-actions" id="modal-actions"></div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL: Pilih Dus ═══ -->
+  <div class="modal-overlay" id="modal-dus-overlay">
+    <div class="modal-box modal-dus">
+      <h3><i class="fa-solid fa-box"></i> Tambah Karton</h3>
+      <div class="modal-field">
+        <label for="modal-dus-select">Pilih Ukuran Dus:</label>
+        <select id="modal-dus-select"></select>
+      </div>
+      <div class="modal-field">
+        <label for="modal-dus-qty">Jumlah (Qty):</label>
+        <input type="number" id="modal-dus-qty" min="1" value="1" placeholder="Qty">
+      </div>
+      <div class="modal-dus-preview" id="modal-dus-preview"></div>
+      <div class="modal-actions">
+        <button class="btn modal-btn-cancel" id="modal-dus-cancel"><i class="fa fa-times"></i> Batal</button>
+        <button class="btn modal-btn-ok" id="modal-dus-ok"><i class="fa fa-plus"></i> Tambah</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL: Transfer Karton ═══ -->
+  <div class="modal-overlay" id="modal-transfer-overlay">
+    <div class="modal-box modal-dus">
+      <h3><i class="fa-solid fa-arrow-right-arrow-left"></i> Transfer Karton</h3>
+      <div class="modal-field">
+        <label>Dari: <b id="transfer-from-label"></b></label>
+        <label>Karton: <b id="transfer-karton-label"></b></label>
+      </div>
+      <div class="modal-field">
+        <label for="transfer-qty">Jumlah yang dipindah:</label>
+        <input type="number" id="transfer-qty" min="1" value="1" placeholder="Qty">
+      </div>
+      <div class="modal-field">
+        <label for="transfer-to">Pindah ke:</label>
+        <select id="transfer-to"></select>
+      </div>
+      <div class="modal-dus-preview" id="transfer-preview"></div>
+      <div class="modal-actions">
+        <button class="btn modal-btn-cancel" id="transfer-cancel"><i class="fa fa-times"></i> Batal</button>
+        <button class="btn modal-btn-ok" id="transfer-ok"><i class="fa fa-arrow-right-arrow-left"></i> Transfer</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 
 </html>
