@@ -5,7 +5,7 @@
 import {
   R2, pf, pi, fmt,
   getCbmPerUnit, calcItemCbm, calcFreight, distributeProportional,
-  getItemCfrFob, calcAllCfrFob,
+  getItemCfrFob, calcAllCfrFob, validateIncoterms,
 } from "./calc.js";
 import { state, buildTplMap, buildAllocMap, saveState } from "./state.js";
 
@@ -214,6 +214,28 @@ export function renderValidation() {
       warnEl.style.color = "var(--orange)";
     } else {
       warnEl.style.display = "none";
+    }
+  }
+
+  // Incoterms® 2020 validation (per-item + global)
+  const incoEl = $("inco-warnings");
+  if (incoEl) {
+    const globalWarnings = validateIncoterms(tCfr, tFob, tFr);
+    cfrFobAll.forEach((r, idx) => {
+      if (r.cfr > 0 || r.fob !== 0 || r.freight !== 0) {
+        const itemW = validateIncoterms(r.cfr, r.fob, r.freight);
+        itemW.forEach((w) =>
+          globalWarnings.push({ level: w.level, msg: `Item ${state.items[idx]?.itemNo || idx + 1}: ${w.msg}` })
+        );
+      }
+    });
+    if (globalWarnings.length > 0) {
+      incoEl.style.display = "block";
+      incoEl.innerHTML = globalWarnings
+        .map((w) => `<div class="inco-${w.level}"><i class="fa fa-${w.level === "error" ? "circle-xmark" : "triangle-exclamation"}"></i> ${w.msg}</div>`)
+        .join("");
+    } else {
+      incoEl.style.display = "none";
     }
   }
 }
