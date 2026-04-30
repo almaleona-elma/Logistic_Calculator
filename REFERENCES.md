@@ -90,7 +90,7 @@
   - Schrijver, A. (1998). *Theory of Linear and Integer Programming.* Wiley. ISBN: 978-0471982326
   - Referensi modern: Bertsimas, D. & Tsitsiklis, J.N. (1997). *Introduction to Linear Optimization.* Athena Scientific. ISBN: 978-1886529199
 - **Relevansi:** Alokasi karton ke item sebagai masalah transportasi (supply = template qty, demand = target qty)
-- **Status:** Greedy di `js/app.js`, ILP reference di `app_final.py` (PuLP)
+- **Status:** Greedy di `js/app.js`. ILP belum porting ke frontend.
 
 ### 4. CBM Calculation — Industry Standard
 
