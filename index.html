@@ -1,216 +1,323 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="cmyk">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description"
-    content="Kalkulator Draft PEB - Alokasi otomatis kubikasi, freight, CFR & FOB per item pengiriman.">
-  <meta name="theme-color" content="#8fbee6">
-  <title>Kalkulator PEB - Alokasi Freight & FOB</title>
+  <meta name="description" content="Kalkulator Draft PEB - Alokasi otomatis kubikasi, freight, CFR & FOB per item pengiriman.">
+  <title>Kalkulator Draft PEB</title>
 
-  <!-- Preconnect for faster font loading -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Tailwind & DaisyUI -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.11.1/dist/full.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
   <link rel="stylesheet" href="style.css">
 </head>
 
-<body>
-  <div class="bg-glow" aria-hidden="true"></div>
+<body class="bg-base-200 min-h-screen flex flex-col items-center py-8">
 
-  <div class="app" role="main">
-    <header class="app-header">
-      <h1><i class="fa-solid fa-ship" aria-hidden="true"></i> Kalkulator Draft PEB</h1>
-      <p>Alokasi Otomatis Kubikasi, Freight, CFR & FOB per Item</p>
-      <button class="theme-toggle" id="btn-theme" title="Toggle Dark/Light Mode" aria-label="Toggle theme">
-        <i class="fa-solid fa-moon" aria-hidden="true"></i>
-      </button>
+  <main class="w-full max-w-7xl px-4 space-y-6">
+    
+    <!-- ══ HEADER ══ -->
+    <header class="navbar bg-base-100 shadow-md rounded-box px-6 py-3 mb-6 flex justify-between items-center">
+      <div class="flex items-center gap-4">
+        <div class="p-3 bg-primary text-primary-content rounded-lg">
+          <i class="fa-solid fa-ship text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold text-base-content leading-tight">Kalkulator Draft PEB</h1>
+          <p class="text-sm text-base-content/70">Alokasi Otomatis Kubikasi, Freight, CFR & FOB per Item</p>
+        </div>
+      </div>
+      <div>
+        <label class="swap swap-rotate btn btn-circle btn-ghost" id="btn-theme" title="Toggle Theme">
+          <input type="checkbox" class="theme-controller" value="business" />
+          <i class="fa-solid fa-sun swap-off fill-current text-xl"></i>
+          <i class="fa-solid fa-moon swap-on fill-current text-xl"></i>
+        </label>
+      </div>
     </header>
 
-    <!-- ═══ PANEL 1: GLOBAL ═══ -->
-    <section class="card" id="panel-global" aria-labelledby="h-global">
-      <h2 id="h-global"><i class="fa-solid fa-sliders" aria-hidden="true"></i> 1. Data Acuan Global</h2>
-
-      <div class="row-4">
-        <div class="field">
-          <label for="g-price">Harga Freight / CBM ($)</label>
-          <input type="text" id="g-price" value="85" inputmode="decimal" autocomplete="off">
+    <!-- ══ PANEL 1: GLOBAL ══ -->
+    <section class="card bg-base-100 shadow-xl" id="panel-global">
+      <div class="card-body">
+        <h2 class="card-title text-lg border-b pb-2 mb-2">
+          <i class="fa-solid fa-sliders text-primary"></i> 1. Data Acuan Global
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold">Harga Freight / CBM ($)</span></label>
+            <label class="input input-bordered flex items-center gap-2">
+              <i class="fa-solid fa-dollar-sign text-base-content/50"></i>
+              <input type="text" id="g-price" class="grow" value="85" inputmode="decimal" autocomplete="off" />
+            </label>
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold">Total Freight Global ($)</span></label>
+            <label class="input input-bordered flex items-center gap-2">
+              <i class="fa-solid fa-dollar-sign text-base-content/50"></i>
+              <input type="text" id="g-freight" class="grow" placeholder="1103.30" inputmode="decimal" autocomplete="off" />
+            </label>
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold">Total CFR Global ($)</span></label>
+            <label class="input input-bordered flex items-center gap-2">
+              <i class="fa-solid fa-dollar-sign text-base-content/50"></i>
+              <input type="text" id="g-cfr" class="grow" placeholder="24742.67" inputmode="decimal" autocomplete="off" />
+            </label>
+          </div>
+          <div class="form-control">
+            <label class="label"><span class="label-text font-semibold">Total FOB Global ($)</span></label>
+            <label class="input input-bordered flex items-center gap-2">
+              <i class="fa-solid fa-dollar-sign text-base-content/50"></i>
+              <input type="text" id="g-fob" class="grow" placeholder="23639.37" inputmode="decimal" autocomplete="off" />
+            </label>
+          </div>
         </div>
-        <div class="field">
-          <label for="g-freight">Total Freight Global ($)</label>
-          <input type="text" id="g-freight" placeholder="1103.30" inputmode="decimal" autocomplete="off">
+        
+        <div class="alert alert-info shadow-sm mt-4 text-sm" id="g-calc-hint">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>Isi 2 dari 3 field (Freight, CFR, FOB) — field yang ke-3 akan terhitung otomatis.</span>
         </div>
-        <div class="field">
-          <label for="g-cfr">Total CFR Global ($)</label>
-          <input type="text" id="g-cfr" placeholder="24742.67" inputmode="decimal" autocomplete="off">
+        <div class="alert alert-warning shadow-sm mt-2 text-sm hidden" id="g-rate-warning">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span id="g-rate-warning-text"></span>
         </div>
-        <div class="field">
-          <label for="g-fob">Total FOB Global ($)</label>
-          <input type="text" id="g-fob" placeholder="23639.37" inputmode="decimal" autocomplete="off">
-        </div>
-      </div>
-      <div class="hint-bar" id="g-calc-hint">Isi 2 dari 3: Freight, CFR, FOB — yang ke-3 otomatis terhitung</div>
-      <div class="hint-bar hint-hidden" id="g-rate-warning" role="alert"></div>
-    </section>
-
-    <!-- ═══ PANEL 2: MASTER TEMPLATE KARTON ═══ -->
-    <section class="card" id="panel-templates" aria-labelledby="h-templates">
-      <h2 id="h-templates"><i class="fa-solid fa-boxes-stacked" aria-hidden="true"></i> 2. Master Measurement (Ukuran
-        Karton)</h2>
-
-      <h3 class="manual-label"><i class="fa-solid fa-keyboard" aria-hidden="true"></i> Input Manual:</h3>
-      <div class="tpl-form" id="tpl-form">
-        <input type="text" id="tf-name" placeholder="Nama (opsional)" autocomplete="off">
-        <input type="text" id="tf-p" placeholder="P (cm)" inputmode="decimal" required autocomplete="off">
-        <input type="text" id="tf-l" placeholder="L (cm)" inputmode="decimal" required autocomplete="off">
-        <input type="text" id="tf-t" placeholder="T (cm)" inputmode="decimal" required autocomplete="off">
-        <input type="number" id="tf-qty" placeholder="Qty Karton" min="1" autocomplete="off">
-        <input type="text" id="tf-cbm" placeholder="CBM Total" inputmode="decimal" autocomplete="off">
-        <div class="auto-cbm" id="tf-cbm-preview" aria-live="polite">Isi Qty atau CBM</div>
-        <button class="btn blue" id="btn-add-tpl" type="button"><i class="fa-solid fa-plus"
-            aria-hidden="true"></i> Tambah</button>
-      </div>
-
-      <div class="tbl-wrap">
-        <table class="tbl" id="tbl-tpl">
-          <thead>
-            <tr>
-              <th>Ukuran (P×L×T cm)</th>
-              <th>CBM/Unit</th>
-              <th>CBM Total</th>
-              <th>Qty Total</th>
-              <th>Sudah Dialokasi</th>
-              <th>Sisa</th>
-              <th><span class="sr-only">Aksi</span></th>
-            </tr>
-          </thead>
-          <tbody id="tpl-body"></tbody>
-          <tfoot>
-            <tr class="tfoot-row">
-              <td><strong>GRAND TOTAL</strong></td>
-              <td></td>
-              <td id="tpl-sum-cbm">0.00</td>
-              <td id="tpl-sum-qty">0</td>
-              <td id="tpl-sum-alloc">0</td>
-              <td id="tpl-sum-sisa">0</td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
       </div>
     </section>
 
-    <!-- ═══ PANEL 3: ITEM ALLOCATION ═══ -->
-    <section class="card" id="panel-items" aria-labelledby="h-items">
-      <div class="card-head">
-        <h2 id="h-items"><i class="fa-solid fa-list-ol" aria-hidden="true"></i> 3. Alokasi Item (Draft PEB)</h2>
-        <div class="head-actions">
-          <button class="btn green" id="btn-add-item" type="button"><i class="fa-solid fa-plus"
-              aria-hidden="true"></i> Tambah Item</button>
-          <button class="btn orange" id="btn-auto-solve" type="button"><i class="fa-solid fa-wand-magic-sparkles"
-              aria-hidden="true"></i> AUTO-SOLVE</button>
+    <!-- ══ PANEL 2: MASTER TEMPLATE ══ -->
+    <section class="card bg-base-100 shadow-xl" id="panel-templates">
+      <div class="card-body p-6">
+        <h2 class="card-title text-lg border-b pb-2 mb-4">
+          <i class="fa-solid fa-boxes-stacked text-secondary"></i> 2. Master Measurement (Ukuran Karton)
+        </h2>
+
+        <!-- Input Form -->
+        <div class="bg-base-200 p-4 rounded-box mb-6 flex flex-wrap lg:flex-nowrap gap-3 items-end">
+          <div class="form-control w-full lg:w-auto flex-1">
+            <label class="label"><span class="label-text text-xs">Nama (Opsional)</span></label>
+            <input type="text" id="tf-name" class="input input-bordered input-sm w-full" placeholder="Contoh: Dus A" autocomplete="off" />
+          </div>
+          <div class="form-control w-1/4 lg:w-20">
+            <label class="label"><span class="label-text text-xs">P (cm)</span></label>
+            <input type="text" id="tf-p" class="input input-bordered input-sm w-full" placeholder="0" inputmode="decimal" />
+          </div>
+          <div class="flex items-center pb-2 text-base-content/50">×</div>
+          <div class="form-control w-1/4 lg:w-20">
+            <label class="label"><span class="label-text text-xs">L (cm)</span></label>
+            <input type="text" id="tf-l" class="input input-bordered input-sm w-full" placeholder="0" inputmode="decimal" />
+          </div>
+          <div class="flex items-center pb-2 text-base-content/50">×</div>
+          <div class="form-control w-1/4 lg:w-20">
+            <label class="label"><span class="label-text text-xs">T (cm)</span></label>
+            <input type="text" id="tf-t" class="input input-bordered input-sm w-full" placeholder="0" inputmode="decimal" />
+          </div>
+          <div class="form-control w-1/2 lg:w-28 ml-auto lg:ml-4">
+            <label class="label"><span class="label-text text-xs">Qty Karton</span></label>
+            <input type="number" id="tf-qty" class="input input-bordered input-sm w-full" placeholder="0" min="1" />
+          </div>
+          <div class="form-control w-1/2 lg:w-32">
+            <label class="label"><span class="label-text text-xs">Total CBM</span></label>
+            <input type="text" id="tf-cbm" class="input input-bordered input-sm w-full" placeholder="0.00" inputmode="decimal" />
+          </div>
+          
+          <button class="btn btn-primary btn-sm ml-auto mt-4 lg:mt-0" id="btn-add-tpl" type="button">
+            <i class="fa-solid fa-plus"></i> Tambah
+          </button>
+        </div>
+        <div class="text-xs text-base-content/60 px-2 -mt-4 mb-4" id="tf-cbm-preview" aria-live="polite">Isi Qty atau CBM (salah satu)</div>
+
+        <!-- Table -->
+        <div class="overflow-x-auto border border-base-300 rounded-box">
+          <table class="table table-zebra table-sm w-full" id="tbl-tpl">
+            <thead class="bg-base-200">
+              <tr>
+                <th>Ukuran (P×L×T cm)</th>
+                <th>CBM/Unit</th>
+                <th>CBM Total</th>
+                <th>Qty Total</th>
+                <th>Sudah Dialokasi</th>
+                <th>Sisa</th>
+                <th class="w-12 text-center"><i class="fa-solid fa-gear"></i></th>
+              </tr>
+            </thead>
+            <tbody id="tpl-body"></tbody>
+            <tfoot class="bg-base-200 font-bold">
+              <tr>
+                <td>GRAND TOTAL</td>
+                <td></td>
+                <td id="tpl-sum-cbm">0.00</td>
+                <td id="tpl-sum-qty">0</td>
+                <td id="tpl-sum-alloc">0</td>
+                <td id="tpl-sum-sisa">0</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
         </div>
       </div>
-
-      <div id="items-wrap"></div>
     </section>
 
-    <!-- ═══ PANEL 4: VALIDATION ═══ -->
-    <section class="card validation-panel" id="panel-valid" aria-labelledby="h-valid">
-      <h2 id="h-valid"><i class="fa-solid fa-check-double" aria-hidden="true"></i> Rekapitulasi & Validasi</h2>
-      <div class="val-grid">
-        <div class="vc" id="vc-cbm">
-          <div class="vc-head">Total CBM <span class="tag" id="tag-cbm">—</span></div>
-          <div class="vc-row"><span>Aktual:</span><b id="va-cbm">0.00</b></div>
-          <div class="vc-row"><span>Target:</span><b id="vt-cbm">0.00</b></div>
+    <!-- ══ PANEL 3: ALOKASI BARANG ══ -->
+    <section class="card bg-base-100 shadow-xl" id="panel-items">
+      <div class="card-body p-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-2 mb-4 gap-4">
+          <h2 class="card-title text-lg">
+            <i class="fa-solid fa-list-check text-accent"></i> 3. Alokasi Per Item
+          </h2>
+          <div class="flex gap-2">
+            <button class="btn btn-success btn-sm" id="btn-auto-solve" title="Bagi sisa template karton otomatis ke item yang kurang">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Solve Alokasi
+            </button>
+            <button class="btn btn-accent btn-sm text-white" id="btn-add-item">
+              <i class="fa-solid fa-plus"></i> Tambah Item
+            </button>
+          </div>
         </div>
-        <div class="vc" id="vc-freight">
-          <div class="vc-head">Total Freight <span class="tag" id="tag-freight">—</span></div>
-          <div class="vc-row"><span>Aktual:</span><b id="va-freight">$ 0.00</b></div>
-          <div class="vc-row"><span>Target:</span><b id="vt-freight">$ 0.00</b></div>
+
+        <div id="items-wrap" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Item Cards go here -->
         </div>
-        <div class="vc" id="vc-cfr">
-          <div class="vc-head">Total CFR <span class="tag" id="tag-cfr">—</span></div>
-          <div class="vc-row"><span>Aktual:</span><b id="va-cfr">$ 0.00</b></div>
-          <div class="vc-row"><span>Target:</span><b id="vt-cfr">$ 0.00</b></div>
-        </div>
-        <div class="vc" id="vc-fob">
-          <div class="vc-head">Total FOB <span class="tag" id="tag-fob">—</span></div>
-          <div class="vc-row"><span>Aktual:</span><b id="va-fob">$ 0.00</b></div>
-          <div class="vc-row"><span>Target:</span><b id="vt-fob">$ 0.00</b></div>
-        </div>
-      </div>
-      <div id="inco-warnings" class="hint-hidden" role="alert"></div>
-      <div class="export-actions">
-        <button class="btn blue" id="btn-copy-result" type="button"><i class="fa-solid fa-copy"
-            aria-hidden="true"></i> Copy Hasil ke Clipboard</button>
-        <button class="btn red btn-reset" id="btn-reset-all" type="button"><i class="fa-solid fa-rotate-left"
-            aria-hidden="true"></i> Reset Semua</button>
       </div>
     </section>
-  </div>
 
-  <!-- ═══ MODAL: Custom Alert / Confirm ═══ -->
-  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true">
-    <div class="modal-box" id="modal-box">
-      <div class="modal-icon" id="modal-icon" aria-hidden="true"></div>
-      <div class="modal-message" id="modal-message"></div>
-      <div class="modal-actions" id="modal-actions"></div>
+    <!-- ══ PANEL 4: VALIDASI ══ -->
+    <section class="card bg-neutral text-neutral-content shadow-xl" id="panel-validation">
+      <div class="card-body p-6">
+        <h2 class="card-title text-lg border-b border-neutral-content/20 pb-2 mb-4">
+          <i class="fa-solid fa-check-double text-success"></i> 4. Validasi Akhir
+        </h2>
+        
+        <div id="validation-warnings" class="space-y-2 mb-6"></div>
+
+        <div class="overflow-x-auto">
+          <table class="table w-full text-neutral-content">
+            <thead class="text-neutral-content/70">
+              <tr>
+                <th>Komponen</th>
+                <th class="text-right">Alokasi (Actual)</th>
+                <th class="text-right">Global (Target)</th>
+                <th class="text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr id="vr-cbm" class="border-b border-neutral-content/10">
+                <td class="font-semibold">CBM Total</td>
+                <td class="text-right font-mono text-lg" id="va-cbm">0.00</td>
+                <td class="text-right font-mono text-lg" id="vt-cbm">0.00</td>
+                <td class="text-center font-bold" id="vs-cbm">—</td>
+              </tr>
+              <tr id="vr-freight" class="border-b border-neutral-content/10">
+                <td class="font-semibold">Total Freight</td>
+                <td class="text-right font-mono text-lg" id="va-freight">$ 0.00</td>
+                <td class="text-right font-mono text-lg" id="vt-freight">$ 0.00</td>
+                <td class="text-center font-bold" id="vs-freight">—</td>
+              </tr>
+              <tr id="vr-cfr" class="border-b border-neutral-content/10">
+                <td class="font-semibold">Total CFR</td>
+                <td class="text-right font-mono text-lg" id="va-cfr">$ 0.00</td>
+                <td class="text-right font-mono text-lg" id="vt-cfr">$ 0.00</td>
+                <td class="text-center font-bold" id="vs-cfr">—</td>
+              </tr>
+              <tr id="vr-fob" class="border-transparent">
+                <td class="font-semibold">Total FOB</td>
+                <td class="text-right font-mono text-lg" id="va-fob">$ 0.00</td>
+                <td class="text-right font-mono text-lg" id="vt-fob">$ 0.00</td>
+                <td class="text-center font-bold" id="vs-fob">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="mt-6 flex justify-end gap-3">
+          <button class="btn btn-error btn-outline" id="btn-reset">
+            <i class="fa-solid fa-rotate-right"></i> Reset Data
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer footer-center p-4 bg-base-300 text-base-content mt-8 rounded-t-box max-w-7xl">
+    <aside>
+      <p>Kalkulator Draft PEB &copy; 2026 - Logistics Calculation Tool</p>
+    </aside>
+  </footer>
+
+  <!-- ══ MODALS (DaisyUI) ══ -->
+  
+  <!-- Alert / Confirm Modal -->
+  <dialog id="modal-alert" class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg flex items-center gap-2" id="modal-title">
+        <span id="modal-icon"></span> Perhatian
+      </h3>
+      <p class="py-4" id="modal-message"></p>
+      <div class="modal-action" id="modal-actions">
+        <!-- Buttons injected by JS -->
+      </div>
     </div>
-  </div>
+    <form method="dialog" class="modal-backdrop">
+      <button>close</button>
+    </form>
+  </dialog>
 
-  <!-- ═══ MODAL: Pilih Dus ═══ -->
-  <div class="modal-overlay" id="modal-dus-overlay" role="dialog" aria-modal="true" aria-label="Tambah Karton">
-    <div class="modal-box modal-dus">
-      <h3><i class="fa-solid fa-box" aria-hidden="true"></i> Tambah Karton</h3>
-      <div class="modal-field">
-        <label for="modal-dus-select">Pilih Ukuran Dus:</label>
-        <select id="modal-dus-select"></select>
+  <!-- Dus Modal -->
+  <dialog id="modal-dus" class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg"><i class="fa-solid fa-box text-primary"></i> Pilih Ukuran Karton</h3>
+      <div class="py-4 space-y-4">
+        <div class="form-control">
+          <label class="label"><span class="label-text">Ukuran Karton (Tersedia)</span></label>
+          <select class="select select-bordered w-full" id="modal-dus-select"></select>
+        </div>
+        <div class="form-control">
+          <label class="label"><span class="label-text">Jumlah Qty</span></label>
+          <input type="number" class="input input-bordered w-full" id="modal-dus-qty" value="1" min="1">
+        </div>
+        <div class="alert shadow-sm text-sm" id="modal-dus-preview"></div>
       </div>
-      <div class="modal-field">
-        <label for="modal-dus-qty">Jumlah (Qty):</label>
-        <input type="number" id="modal-dus-qty" min="1" value="1" placeholder="Qty">
-      </div>
-      <div class="modal-dus-preview" id="modal-dus-preview" aria-live="polite"></div>
-      <div class="modal-actions">
-        <button class="btn modal-btn-cancel" id="modal-dus-cancel" type="button"><i class="fa fa-times"
-            aria-hidden="true"></i> Batal</button>
-        <button class="btn modal-btn-ok" id="modal-dus-ok" type="button"><i class="fa fa-plus"
-            aria-hidden="true"></i> Tambah</button>
+      <div class="modal-action">
+        <button class="btn btn-ghost" id="modal-dus-cancel">Batal</button>
+        <button class="btn btn-primary" id="modal-dus-ok">Tambah</button>
       </div>
     </div>
-  </div>
+  </dialog>
 
-  <!-- ═══ MODAL: Transfer Karton ═══ -->
-  <div class="modal-overlay" id="modal-transfer-overlay" role="dialog" aria-modal="true" aria-label="Transfer Karton">
-    <div class="modal-box modal-dus">
-      <h3><i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i> Transfer Karton</h3>
-      <div class="modal-field">
-        <label>Dari: <b id="transfer-from-label"></b></label>
-        <label>Karton: <b id="transfer-karton-label"></b></label>
+  <!-- Transfer Modal -->
+  <dialog id="modal-transfer" class="modal">
+    <div class="modal-box">
+      <h3 class="font-bold text-lg"><i class="fa-solid fa-arrow-right-arrow-left text-warning"></i> Pindah Karton</h3>
+      <div class="py-4 space-y-4">
+        <div class="bg-base-200 p-3 rounded-box text-sm">
+          <div class="font-semibold text-primary" id="transfer-from-label"></div>
+          <div id="transfer-karton-label"></div>
+        </div>
+        <div class="flex gap-4">
+          <div class="form-control w-1/3">
+            <label class="label"><span class="label-text">Qty Pindah</span></label>
+            <input type="number" class="input input-bordered w-full" id="transfer-qty" min="1">
+          </div>
+          <div class="form-control w-2/3">
+            <label class="label"><span class="label-text">Ke Item Tujuan</span></label>
+            <select class="select select-bordered w-full" id="transfer-to"></select>
+          </div>
+        </div>
+        <div class="alert shadow-sm text-sm bg-base-200" id="transfer-preview"></div>
       </div>
-      <div class="modal-field">
-        <label for="transfer-qty">Jumlah yang dipindah:</label>
-        <input type="number" id="transfer-qty" min="1" value="1" placeholder="Qty">
-      </div>
-      <div class="modal-field">
-        <label for="transfer-to">Pindah ke:</label>
-        <select id="transfer-to"></select>
-      </div>
-      <div class="modal-dus-preview" id="transfer-preview" aria-live="polite"></div>
-      <div class="modal-actions">
-        <button class="btn modal-btn-cancel" id="transfer-cancel" type="button"><i class="fa fa-times"
-            aria-hidden="true"></i> Batal</button>
-        <button class="btn modal-btn-ok" id="transfer-ok" type="button"><i class="fa fa-arrow-right-arrow-left"
-            aria-hidden="true"></i> Transfer</button>
+      <div class="modal-action">
+        <button class="btn btn-ghost" id="transfer-cancel">Batal</button>
+        <button class="btn btn-warning" id="transfer-ok">Transfer</button>
       </div>
     </div>
-  </div>
+  </dialog>
 
   <script type="module" src="js/app.js"></script>
 </body>
-
 </html>
