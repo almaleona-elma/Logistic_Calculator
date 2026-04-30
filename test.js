@@ -29,6 +29,23 @@ function getItemCfrFob(item, freight) {
 function calcFreightOld(rawCbm, price) { return R2(R2(rawCbm) * price); }
 function calcFreightNew(rawCbm, price) { return R2(rawCbm * price); }
 
+function distributeProportional(total, weights) {
+  const sumW = weights.reduce((s, w) => s + w, 0);
+  if (sumW === 0) return weights.map(() => 0);
+  const totalCents = Math.round(total * 100);
+  const exact = weights.map((w) => (total * w) / sumW);
+  const floors = exact.map((v) => Math.floor(v * 100));
+  const remainders = exact.map((v, i) => ({ r: v * 100 - floors[i], i }));
+  remainders.sort((a, b) => b.r - a.r);
+  let toDistribute = totalCents - floors.reduce((s, f) => s + f, 0);
+  for (const { i } of remainders) {
+    if (toDistribute <= 0) break;
+    floors[i] += 1;
+    toDistribute -= 1;
+  }
+  return floors.map((f) => f / 100);
+}
+
 // ── Mini test framework ──
 let pass = 0, fail = 0, groupName = '';
 const RED = '\x1b[31m', GREEN = '\x1b[32m', DIM = '\x1b[2m', BOLD = '\x1b[1m', RESET = '\x1b[0m';
@@ -153,8 +170,8 @@ describe("TC7: getItemCfrFob() — Bidirectional CFR ↔ FOB", () => {
   });
 });
 
-describe("TC8: Remainder FOB → Item Terkecil", () => {
-  it("3 items: sisa FOB ke item CFR terkecil, total FOB match", () => {
+describe("TC8: FOB Proporsional (Largest Remainder)", () => {
+  it("3 items: FOB terdistribusi proporsional, total exact", () => {
     const globalFob = 23639.37;
     const items = [
       { cfrInput: 15000, fobInput: 0, lastItemEdited: "cfr" },
@@ -164,15 +181,13 @@ describe("TC8: Remainder FOB → Item Terkecil", () => {
     const freights = [600, 350, 153.30];
     const results = items.map((item, i) => ({ ...getItemCfrFob(item, freights[i]), freight: freights[i] }));
 
-    let sIdx = 0, sCfr = Infinity;
-    results.forEach((r, i) => { if (r.cfr < sCfr) { sCfr = r.cfr; sIdx = i; } });
-    eq(sIdx, 2, "Smallest = idx 2");
+    // Use proportional distribution
+    const rawFobs = results.map(r => Math.max(r.fob, 0));
+    const fairFobs = distributeProportional(globalFob, rawFobs);
 
-    let sumFob = 0;
-    results.forEach((r, i) => { if (i !== sIdx) sumFob += r.fob; });
-    results[sIdx].fob = R2(globalFob - sumFob);
-
-    approx(results.reduce((s, r) => s + r.fob, 0), globalFob, 0.01, "Total FOB");
+    // Total must be EXACT
+    const totalFob = fairFobs.reduce((s, f) => s + f, 0);
+    eq(totalFob, globalFob, "Total FOB EXACT match");
   });
 });
 
@@ -253,6 +268,58 @@ describe("TC12: E2E — 3 Item, 2 Template", () => {
     results.forEach((r, i) => {
       if (r.freight / r.cfr > 0.3) throw new Error(`Item ${i}: Freight/CFR > 30%`);
     });
+  });
+});
+
+describe("TC14: distributeProportional() — Hare-Niemeyer", () => {
+  it("Σ result = total (exact, selalu)", () => {
+    const result = distributeProportional(1103.30, [5.074, 3.413, 4.501]);
+    eq(result.reduce((s, v) => s + v, 0), 1103.30, "Sum exact");
+  });
+
+  it("Proporsi benar", () => {
+    const result = distributeProportional(1000, [50, 30, 20]);
+    eq(result[0], 500);
+    eq(result[1], 300);
+    eq(result[2], 200);
+  });
+
+  it("Edge: semua weight 0 → semua 0", () => {
+    const result = distributeProportional(100, [0, 0, 0]);
+    eq(result[0], 0); eq(result[1], 0); eq(result[2], 0);
+  });
+
+  it("Edge: 1 item → mendapat semua", () => {
+    const result = distributeProportional(500.50, [1]);
+    eq(result[0], 500.50);
+  });
+
+  it("Remainder cents ke fractional terbesar", () => {
+    // 100 / 3 = 33.3333... each
+    const result = distributeProportional(100, [1, 1, 1]);
+    const sum = result.reduce((s, v) => s + v, 0);
+    eq(sum, 100, "Sum exact");
+    // Two items get 33.34, one gets 33.33 (or similar)
+    result.forEach(v => approx(v, 33.33, 0.02));
+  });
+
+  it("Distribusi freight realistis: 3 item", () => {
+    const freight = 1103.30;
+    const cbms = [5.674, 2.856, 4.458];
+    const result = distributeProportional(freight, cbms);
+    eq(result.reduce((s, v) => s + v, 0), freight, "Sum exact");
+    // Proportional check
+    const totalCbm = cbms.reduce((s, c) => s + c, 0);
+    result.forEach((v, i) => {
+      const expected = freight * cbms[i] / totalCbm;
+      approx(v, expected, 0.01, `Item ${i}`);
+    });
+  });
+
+  it("Banyak item (10) tetap exact", () => {
+    const weights = [1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8, 9.9, 0.5];
+    const result = distributeProportional(9999.99, weights);
+    eq(result.reduce((s, v) => s + v, 0), 9999.99, "Sum exact");
   });
 });
 
