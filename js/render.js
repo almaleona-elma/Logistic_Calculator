@@ -4,7 +4,7 @@
 
 import {
   R2, pf, pi, fmt,
-  getCbmPerUnit, calcItemCbm, calcFreight,
+  getCbmPerUnit, calcItemCbm, calcFreight, distributeProportional,
   getItemCfrFob, calcAllCfrFob,
 } from "./calc.js";
 import { state, buildTplMap, buildAllocMap, saveState } from "./state.js";
@@ -32,9 +32,19 @@ export function getGlobalInputs() {
 
 function calcItemFreights() {
   const price = pf(gPrice.value);
+  const globalFreight = pf(gFreight.value);
   const tplMap = buildTplMap();
   const data = state.items.map((item) => calcItemCbm(item, tplMap));
-  const freights = data.map((d) => calcFreight(d.rawCbm, price));
+  const rawCbms = data.map((d) => d.rawCbm);
+  const hasCbm = rawCbms.some((c) => c > 0);
+
+  // Largest Remainder: distribute global freight proportionally by CBM
+  // Guarantees Σ freight_i = globalFreight exactly (Hare-Niemeyer)
+  const freights =
+    globalFreight > 0 && hasCbm
+      ? distributeProportional(globalFreight, rawCbms)
+      : data.map((d) => calcFreight(d.rawCbm, price));
+
   return { data, freights, tplMap };
 }
 
