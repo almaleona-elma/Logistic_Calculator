@@ -12,7 +12,17 @@ document.addEventListener("DOMContentLoaded", () => {
       maximumFractionDigits: d,
     });
   const $ = (id) => document.getElementById(id);
-  const pf = (v) => parseFloat(String(v).replace(",", ".")) || 0; // handle comma decimal
+  const pf = (v) => {
+    const s = String(v).replace(/\s/g, '');
+    if (!s) return 0;
+    // "1,234.56" — comma as thousands separator
+    if (/,\d{3}/.test(s) && s.includes('.')) return parseFloat(s.replace(/,/g, '')) || 0;
+    // "1.234,56" — dot as thousands, comma as decimal
+    if (/\.\d{3}/.test(s) && s.includes(',')) return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0;
+    // "1234,56" — comma as decimal
+    if (s.includes(',')) return parseFloat(s.replace(',', '.')) || 0;
+    return parseFloat(s) || 0;
+  };
   const pi = (v) => parseInt(v) || 0; // shorthand parseInt-or-0
 
   // ══════════════════════════════════════════════
@@ -675,6 +685,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (parsed.global.freight) gFreight.value = parsed.global.freight;
     if (parsed.global.cfr) gCfr.value = parsed.global.cfr;
+    if (parsed.global.fob) gFob.value = parsed.global.fob;
     updateGlobal();
     renderAll();
     setBar(
@@ -726,14 +737,14 @@ document.addEventListener("DOMContentLoaded", () => {
         renderAll();
       }
     } else if (zone === "items") {
-      parsed.items.forEach((pi) => {
-        const exists = items.find((it) => it.itemNo === pi.itemNo);
-        if (exists) exists.targetQty = pi.qty;
+      parsed.items.forEach((pItem) => {
+        const exists = items.find((it) => it.itemNo === pItem.itemNo);
+        if (exists) exists.targetQty = pItem.qty;
         else
           items.push({
-            id: Date.now() + pi.itemNo,
-            itemNo: pi.itemNo,
-            targetQty: pi.qty,
+            id: Date.now() + pItem.itemNo,
+            itemNo: pItem.itemNo,
+            targetQty: pItem.qty,
             cartons: [],
             cfrInput: 0,
             fobInput: 0,
@@ -993,7 +1004,8 @@ document.addEventListener("DOMContentLoaded", () => {
       return { rawCbm, totQty };
     });
     // Selalu CBM × Rate (CBM dibulatkan 2 desimal)
-    const freights = data.map((d) => R2(R2(d.rawCbm) * price));
+    // Single rounding: hindari compound rounding error dari R2(R2(...))
+    const freights = data.map((d) => R2(d.rawCbm * price));
     return { data, freights, tplMap };
   }
 
@@ -1151,7 +1163,8 @@ document.addEventListener("DOMContentLoaded", () => {
       .map((item, idx) => ({ item, idx, origNo: item.itemNo }))
       .sort((a, b) => b.item.targetQty - a.item.targetQty);
 
-    items.forEach((it) => (it.cartons = []));
+    // Hanya clear karton item yang punya target, preservasi item tanpa target
+    items.forEach((it) => { if (it.targetQty > 0) it.cartons = []; });
     let gIdx = 0;
     sortedItems.forEach(({ item }) => {
       let need = item.targetQty;
@@ -1203,7 +1216,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const aFob = R2(aCfr - aFr);
     const tFr = pf(gFreight.value),
       tCfr = pf(gCfr.value),
-      tFob = R2(tCfr - tFr);
+      tFobInput = pf(gFob.value),
+      tFob = tFobInput > 0 ? tFobInput : R2(tCfr - tFr);
     const tCbm = templates.length
       ? R2(templates.reduce((s, tp) => s + tp.cbmTarget, 0))
       : 0;
