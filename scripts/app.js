@@ -53,14 +53,14 @@ function updateGlobal() {
   );
   if (result) {
     const labels = { fob: "FOB", cfr: "CFR", freight: "Freight" };
-    const colors = { fob: "var(--green)", cfr: "var(--blue)", freight: "var(--orange)" };
+    const colors = { fob: "text-success", cfr: "text-info", freight: "text-warning" };
     const inputs = { fob: gFob, cfr: gCfr, freight: gFreight };
     inputs[result.field].value = result.value;
-    gHint.textContent = `${labels[result.field]} = $${fmt(result.value)}`;
-    gHint.style.color = colors[result.field];
+    gHint.innerHTML = `<i class="fa-solid fa-circle-check ${colors[result.field]}"></i> <span class="font-bold">Terhitung Otomatis:</span> ${labels[result.field]} = $${fmt(result.value)}`;
+    gHint.className = "flex items-center gap-2 p-3 mt-4 bg-base-200/50 rounded-box text-sm border border-base-300";
   } else {
-    gHint.textContent = "Isi 2 dari 3: Freight, CFR, FOB — yang ke-3 otomatis terhitung";
-    gHint.style.color = "";
+    gHint.innerHTML = `<i class="fa-solid fa-circle-info text-base-content/50"></i> <span>Isi 2 dari 3 field (Freight, CFR, FOB) — field ke-3 otomatis terhitung.</span>`;
+    gHint.className = "flex items-center gap-2 p-3 mt-4 bg-base-200/50 rounded-box text-sm border border-base-300 text-base-content/70";
   }
 }
 
