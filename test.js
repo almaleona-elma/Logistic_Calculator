@@ -396,6 +396,60 @@ describe("TC16: validateIncoterms() — Incoterms® 2020", () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
+// TC17: Real Data from Sample PDF (EVERGREEN TEXTILE)
+// ═══════════════════════════════════════════════════════════════
+describe("TC17: Real Data from Sample PDF (EVERGREEN TEXTILE)", () => {
+  it("should process shipment with 2 items and 3 carton types correctly", () => {
+    const rate = 150;        // $150 / CBM
+    const globalFreight = 1468.50;
+    const globalCfr = 23854.92;
+    const globalFob = 22386.42; // Note: 23854.92 - 1468.50 = 22386.42
+
+    const tplMap = new Map([
+      [1, { cbmTarget: 5.76186, qtyTotal: 26 }], // 149x42.5x35
+      [2, { cbmTarget: 3.85016, qtyTotal: 19 }], // 149x42.5x32
+      [3, { cbmTarget: 0.17731, qtyTotal: 1 }]   // 149x42.5x28
+    ]);
+
+    const itemData = [
+      { cartons: [{ tplId: 1, qty: 26 }, { tplId: 2, qty: 17 }], cfrInput: 22747.45 },
+      { cartons: [{ tplId: 2, qty: 2 }, { tplId: 3, qty: 1 }], cfrInput: 1107.48 }
+    ];
+
+    // 1. Calculate raw CBM
+    let totalCbm = 0;
+    const rawCbms = itemData.map(item => {
+      let cbm = 0;
+      item.cartons.forEach(c => {
+        const tp = tplMap.get(c.tplId);
+        cbm += (tp.cbmTarget / tp.qtyTotal) * c.qty;
+      });
+      totalCbm += cbm;
+      return cbm;
+    });
+
+    // 2. Calculate initial freights & FOB
+    const initialFreights = rawCbms.map(cbm => cbm * rate);
+    
+    // 3. Proportional Distribution
+    const fairFreights = distributeProportional(globalFreight, initialFreights);
+    
+    const rawFobs = itemData.map((item, i) => Math.max(0, item.cfrInput - fairFreights[i]));
+    const fairFobs = distributeProportional(globalFob, rawFobs);
+
+    const sumFr = R2(fairFreights[0] + fairFreights[1]);
+    const sumFob = R2(fairFobs[0] + fairFobs[1]);
+    const sumCfr = R2(itemData[0].cfrInput + itemData[1].cfrInput);
+
+    // Verify
+    eq(Math.round(totalCbm * 100), 979); // 9.79 m3 (matches PDF)
+    eq(sumFr, globalFreight);            // 1468.50 exact match
+    eq(sumFob, globalFob);               // 22386.42 exact match
+    eq(sumCfr, 23854.93);                // CFR target was 23854.92, sum is 93 (1 cent difference allowed/expected from input data)
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════
 //  SUMMARY
 // ═══════════════════════════════════════════════════════════════
 console.log(`\n${'═'.repeat(50)}`);
