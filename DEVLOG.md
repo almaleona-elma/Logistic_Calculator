@@ -172,6 +172,17 @@ SI/PL → Ukuran karton (P×L×T) + qty per template + qty target per item
 - **Bug:** Variabel `pool` undefined setelah refactor grouping
 - **Fix:** Ganti dengan `groupArr.reduce(...)` untuk hitung sisa
 
+### 4. Multi-fix Analisis Akurasi (2026-04-30)
+
+- **A1 — Double-rounding Freight:** `R2(R2(rawCbm) * price)` → `R2(rawCbm * price)`
+- **A2 — Validasi FOB:** Target FOB kini gunakan input `g-fob` jika tersedia
+- **A4 — parseGlobal() FOB:** OCR FOB kini di-set ke field input
+- **B1 — Auto-Solve clear:** Hanya clear karton item yang punya targetQty > 0
+- **B2 — pf() parser:** Handle format US (1,234.56), EU (1.234,56), dan comma decimal
+- **B5 — Variable shadowing:** `pi` → `pItem` di applyParsed("items")
+- **C5 — g-rate-warning:** Tambahkan element HTML yang hilang
+- **Lesson:** Selalu audit rounding chain end-to-end; pastikan setiap element yang direferensikan JS ada di HTML
+
 ---
 
 ## 📋 Conversation History Summary
@@ -191,17 +202,7 @@ SI/PL → Ukuran karton (P×L×T) + qty per template + qty target per item
 | 2026-04-27 | Auto-solve grouping by P + sort by T | ✅                       |
 | 2026-04-27 | Quick redistribute (transfer modal)  | ✅                       |
 | 2026-04-27 | Fix tfPrev collision bug             | ✅                       |
-
----
-
-## 🔁 Rollback Commands
-
-```powershell
-# Rollback ke sebelum fitur transfer/auto-solve
-Copy-Item "d:\Program\maul\KalkulatorLogistik\script.js.backup" "d:\Program\maul\KalkulatorLogistik\script.js" -Force
-Copy-Item "d:\Program\maul\KalkulatorLogistik\index.html.backup" "d:\Program\maul\KalkulatorLogistik\index.html" -Force
-Copy-Item "d:\Program\maul\KalkulatorLogistik\style.css.backup" "d:\Program\maul\KalkulatorLogistik\style.css" -Force
-```
+| 2026-04-30 | Analisis & fix akurasi perhitungan   | ✅                       |
 
 ---
 
