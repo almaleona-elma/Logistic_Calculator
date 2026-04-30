@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="cmyk">
+<html lang="en" data-theme="dracula">
 
 <head>
   <meta charset="UTF-8">
@@ -14,7 +14,8 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   
-  <link rel="stylesheet" href="style.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles/style.css">
 </head>
 
 <body class="bg-base-200 min-h-screen flex flex-col items-center py-8">
@@ -34,9 +35,9 @@
       </div>
       <div>
         <label class="swap swap-rotate btn btn-circle btn-ghost" id="btn-theme" title="Toggle Theme">
-          <input type="checkbox" class="theme-controller" value="business" />
-          <i class="fa-solid fa-sun swap-off fill-current text-xl"></i>
-          <i class="fa-solid fa-moon swap-on fill-current text-xl"></i>
+          <input type="checkbox" class="theme-controller" value="light" />
+          <i class="fa-solid fa-moon swap-off fill-current text-xl"></i>
+          <i class="fa-solid fa-sun swap-on fill-current text-xl"></i>
         </label>
       </div>
     </header>
@@ -318,6 +319,6 @@
     </div>
   </dialog>
 
-  <script type="module" src="js/app.js"></script>
+  <script type="module" src="scripts/app.js"></script>
 </body>
 </html>
