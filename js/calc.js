@@ -65,6 +65,40 @@ export function calcFreight(rawCbm, rate) {
   return R2(rawCbm * rate);
 }
 
+/**
+ * Largest Remainder Method (Hare-Niemeyer) — distribusi proporsional
+ * dengan jaminan Σ result = total (exact to 2 decimal places).
+ *
+ * Berdasarkan teori Apportionment (Balinski & Young, 2001).
+ * Digunakan di sistem pemilu proporsional untuk distribusi kursi.
+ *
+ * @param {number} total   - Nilai total yang akan didistribusikan
+ * @param {number[]} weights - Bobot proporsional (misal: CBM per item)
+ * @returns {number[]} Nilai terdistribusi, Σ === total (exact)
+ */
+export function distributeProportional(total, weights) {
+  const sumW = weights.reduce((s, w) => s + w, 0);
+  if (sumW === 0) return weights.map(() => 0);
+
+  const totalCents = Math.round(total * 100);
+  const exact = weights.map((w) => (total * w) / sumW);
+  const floors = exact.map((v) => Math.floor(v * 100));
+  let sumFloors = floors.reduce((s, f) => s + f, 0);
+
+  // Distribute remaining cents to items with largest fractional remainders
+  const remainders = exact.map((v, i) => ({ r: v * 100 - floors[i], i }));
+  remainders.sort((a, b) => b.r - a.r);
+
+  let toDistribute = totalCents - sumFloors;
+  for (const { i } of remainders) {
+    if (toDistribute <= 0) break;
+    floors[i] += 1;
+    toDistribute -= 1;
+  }
+
+  return floors.map((f) => f / 100);
+}
+
 // ── CFR / FOB ──
 
 /** Bidirectional CFR ↔ FOB for a single item */
@@ -76,7 +110,11 @@ export function getItemCfrFob(item, freight) {
   return { cfr: 0, fob: 0 };
 }
 
-/** Calculate CFR/FOB for all items. Remainder FOB → smallest item. */
+/**
+ * Calculate CFR/FOB for all items.
+ * Uses proportional distribution (Largest Remainder) for fair FOB allocation
+ * instead of dumping remainder to a single item.
+ */
 export function calcAllCfrFob(items, freights, globalFob) {
   const results = items.map((item, idx) => {
     const base = getItemCfrFob(item, freights[idx]);
@@ -86,20 +124,16 @@ export function calcAllCfrFob(items, freights, globalFob) {
     items.length >= 2 && results.every((r) => r.cfr > 0);
   if (!allHaveValues || globalFob <= 0) return results;
 
-  let sIdx = 0,
-    sCfr = Infinity;
-  results.forEach((r, i) => {
-    if (r.cfr < sCfr) {
-      sCfr = r.cfr;
-      sIdx = i;
-    }
-  });
-  let sumFob = 0;
-  results.forEach((r, i) => {
-    if (i !== sIdx) sumFob += r.fob;
-  });
-  results[sIdx].fob = R2(globalFob - sumFob);
-  results[sIdx].freight = R2(results[sIdx].cfr - results[sIdx].fob);
+  // Distribute globalFob proportionally using Largest Remainder
+  const rawFobs = results.map((r) => Math.max(r.fob, 0));
+  const sumRaw = rawFobs.reduce((s, f) => s + f, 0);
+  if (sumRaw > 0) {
+    const fairFobs = distributeProportional(globalFob, rawFobs);
+    results.forEach((r, i) => {
+      r.fob = fairFobs[i];
+      r.freight = R2(r.cfr - r.fob);
+    });
+  }
   return results;
 }
 
