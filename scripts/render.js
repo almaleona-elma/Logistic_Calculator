@@ -11,6 +11,9 @@ import { state, buildTplMap, buildAllocMap, saveState } from "./state.js";
 
 const $ = (id) => document.getElementById(id);
 
+const statusBadge = (type, label, icon = "fa-check") =>
+  `<span class="status-badge status-badge-${type}"><i class="fa-solid ${icon}"></i><span>${label}</span></span>`;
+
 // ── Global Inputs (cached references) ──
 
 const gPrice = $("g-price"),
@@ -68,30 +71,30 @@ export function renderTemplates() {
     const al = allocMap.get(tp.id) || 0, si = tp.qtyTotal - al;
     sC += tp.cbmTarget; sQ += tp.qtyTotal; sA += al;
     
-    const chip = si === 0
-      ? '<span class="text-xs font-bold text-success"><i class="fa-solid fa-check"></i> Habis</span>'
-      : si > 0
-        ? `<span class="text-xs font-bold text-warning">${si} Sisa</span>`
-        : `<span class="text-xs font-bold text-error">${Math.abs(si)} Lebih</span>`;
+    const chip = si === 0 
+        ? statusBadge("success", "Pas")
+        : si > 0 
+        ? statusBadge("neutral", `${si} Sisa`, "fa-box-open")
+        : statusBadge("error", `${Math.abs(si)} Lebih`, "fa-arrow-trend-up");
         
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>
-        <input type="text" value="${tp.name}" class="input input-xs input-ghost w-full max-w-[100px] font-bold tpl-edit tpl-edit-name" data-tpl-name="${i}">
+        <input type="text" value="${tp.name}" class="input input-sm input-ghost w-full max-w-[120px] font-bold tpl-edit tpl-edit-name" data-tpl-name="${i}">
       </td>
       <td>
-        <div class="flex items-center gap-1 text-xs">
-          <input type="text" inputmode="decimal" value="${tp.p}" class="input input-xs input-bordered w-12 text-center tpl-edit tpl-edit-dim" data-tpl-p="${i}"> ×
-          <input type="text" inputmode="decimal" value="${tp.l}" class="input input-xs input-bordered w-12 text-center tpl-edit tpl-edit-dim" data-tpl-l="${i}"> ×
-          <input type="text" inputmode="decimal" value="${tp.t}" class="input input-xs input-bordered w-12 text-center tpl-edit tpl-edit-dim" data-tpl-t="${i}">
+        <div class="flex items-center gap-1 text-sm">
+          <input type="text" inputmode="decimal" value="${tp.p}" class="input input-sm input-bordered w-14 p-1 text-center font-mono font-bold text-sm tpl-edit tpl-edit-dim" data-tpl-p="${i}"> ×
+          <input type="text" inputmode="decimal" value="${tp.l}" class="input input-sm input-bordered w-14 p-1 text-center font-mono font-bold text-sm tpl-edit tpl-edit-dim" data-tpl-l="${i}"> ×
+          <input type="text" inputmode="decimal" value="${tp.t}" class="input input-sm input-bordered w-14 p-1 text-center font-mono font-bold text-sm tpl-edit tpl-edit-dim" data-tpl-t="${i}">
         </div>
       </td>
-      <td class="font-mono text-xs">${tp.cbmPerUnit.toFixed(6)}</td>
-      <td><input type="text" inputmode="decimal" value="${tp.cbmTarget.toFixed(2)}" class="input input-xs input-bordered w-16 text-right font-mono tpl-edit" data-tpl-cbm="${i}"></td>
-      <td><input type="number" min="0" value="${tp.qtyTotal}" class="input input-xs input-bordered w-16 text-right tpl-edit" data-tpl-qty="${i}"></td>
-      <td class="font-bold">${al}</td>
-      <td>${chip}</td>
-      <td class="text-center"><button class="btn btn-ghost btn-xs text-error" data-del-tpl="${i}" title="Hapus"><i class="fa fa-trash"></i></button></td>
+      <td class="font-mono font-bold text-sm">${tp.cbmPerUnit.toFixed(6)}</td>
+      <td><input type="text" inputmode="decimal" value="${tp.cbmTarget.toFixed(2)}" class="input input-sm input-bordered w-20 text-right font-mono font-bold text-sm tpl-edit" data-tpl-cbm="${i}"></td>
+      <td><input type="number" min="0" value="${tp.qtyTotal}" class="input input-sm input-bordered w-20 text-right font-mono font-bold text-sm tpl-edit" data-tpl-qty="${i}"></td>
+      <td class="font-bold font-mono text-sm">${al}</td>
+      <td class="text-sm">${chip}</td>
+      <td class="text-center"><button class="btn btn-square btn-sm bg-error/20 text-error hover:bg-error/40 border-none transition-colors" data-del-tpl="${i}" title="Hapus Template"><i class="fa fa-trash"></i></button></td>
     `;
     tb.appendChild(tr);
   });
@@ -119,12 +122,12 @@ export function renderItems() {
       const cbmPU = getCbmPerUnit(tp);
       cRows += `
         <tr>
-          <td class="text-xs">${tp.p}×${tp.l}×${tp.t}</td>
-          <td class="font-bold">${c.qty}</td>
-          <td class="font-mono text-xs">${(cbmPU * c.qty).toFixed(4)}</td>
+          <td class="text-sm font-mono font-bold">${tp.p}×${tp.l}×${tp.t}</td>
+          <td class="font-bold font-mono text-sm">${c.qty}</td>
+          <td class="font-bold font-mono text-sm">${(cbmPU * c.qty).toFixed(4)}</td>
           <td class="text-right space-x-1">
-            <button class="btn btn-ghost btn-xs text-warning" data-xfer="${idx},${ci}" title="Transfer Kardus"><i class="fa fa-arrow-right-arrow-left"></i></button>
-            <button class="btn btn-ghost btn-xs text-error" data-del-cart="${idx},${ci}" title="Hapus Kardus"><i class="fa fa-times"></i></button>
+            <button class="btn btn-square btn-sm bg-warning/20 text-warning hover:bg-warning/40 border-none transition-colors" data-xfer="${idx},${ci}" title="Transfer Kardus"><i class="fa fa-arrow-right-arrow-left"></i></button>
+            <button class="btn btn-square btn-sm bg-error/20 text-error hover:bg-error/40 border-none transition-colors" data-del-cart="${idx},${ci}" title="Hapus Kardus"><i class="fa fa-trash"></i></button>
           </td>
         </tr>`;
     });
@@ -134,35 +137,37 @@ export function renderItems() {
     let qS = "";
     if (item.targetQty > 0) {
       if (totQty === item.targetQty)
-        qS = '<span class="text-xs font-bold text-success ml-2"><i class="fa-solid fa-check"></i> Pas</span>';
+        qS = statusBadge("success", "Pas");
       else if (totQty < item.targetQty)
-        qS = `<span class="text-xs font-bold text-warning ml-2">Kurang ${item.targetQty - totQty}</span>`;
+        qS = statusBadge("warning", `Kurang ${item.targetQty - totQty}`, "fa-triangle-exclamation");
       else
-        qS = `<span class="text-xs font-bold text-error ml-2">Lebih ${totQty - item.targetQty}</span>`;
+        qS = statusBadge("error", `Lebih ${totQty - item.targetQty}`, "fa-arrow-trend-up");
     }
 
     const div = document.createElement("div");
-    div.className = "card bg-base-200 border border-base-300 shadow-sm";
+    div.className = "card bg-base-200 border border-base-300 shadow-sm h-full flex flex-col";
     div.innerHTML = `
-      <div class="card-body p-4 lg:p-5">
-        <div class="flex justify-between items-center mb-4 border-b border-base-300 pb-3 gap-2">
-          <div>
-            <h3 class="font-bold text-lg text-primary leading-tight">Item No. ${item.itemNo}</h3>
-            <div class="flex flex-wrap items-center mt-1 gap-2">
-              <span class="text-sm opacity-70">Target Qty:</span>
-              <input type="number" value="${item.targetQty || ""}" placeholder="0" data-tq="${idx}" min="0" class="input input-bordered input-xs w-16 text-center">
-              ${qS}
+      <div class="card-body p-4 lg:p-5 flex flex-col h-full flex-1">
+        <div class="flex justify-between items-start mb-4 border-b border-base-300 pb-3 gap-2">
+          <div class="flex flex-col gap-2">
+            <h3 class="font-bold text-lg text-primary leading-tight mt-1">Item No. ${item.itemNo}</h3>
+            <div class="flex flex-wrap items-center gap-2 mt-1">
+              <span class="text-sm opacity-70 font-medium">Target Qty:</span>
+              <input type="number" value="${item.targetQty || ""}" placeholder="0" data-tq="${idx}" min="0" class="input input-bordered input-sm w-20 text-center font-mono font-bold">
             </div>
           </div>
-          <div class="flex gap-1">
-            <button class="btn btn-secondary btn-sm" data-add-cart="${idx}" title="Tambah Karton"><i class="fa fa-plus"></i> <span class="hidden sm:inline">Karton</span></button>
-            <button class="btn btn-error btn-sm btn-square" data-del-item="${idx}" title="Hapus Item"><i class="fa fa-trash"></i></button>
+          <div class="flex flex-col items-end gap-2">
+            <div class="h-6 flex items-center">${qS}</div>
+            <div class="flex gap-2 mt-1">
+              <button class="btn btn-primary btn-sm w-8 sm:w-auto px-0 sm:px-3" data-add-cart="${idx}" title="Tambah Karton"><i class="fa fa-plus"></i> <span class="hidden sm:inline ml-1">Karton</span></button>
+              <button class="btn btn-error btn-sm w-8 sm:w-auto px-0 sm:px-3 text-base-100" data-del-item="${idx}" title="Hapus Item"><i class="fa fa-trash"></i> <span class="hidden sm:inline ml-1">Hapus</span></button>
+            </div>
           </div>
         </div>
         
-        <div class="overflow-x-auto mb-4 bg-base-100 rounded-box border border-base-300">
-          <table class="table table-xs w-full whitespace-nowrap">
-            <thead class="bg-base-200">
+        <div class="overflow-x-auto mb-4 bg-base-100 rounded-box border border-base-300 flex-1">
+          <table class="table table-sm w-full whitespace-nowrap">
+            <thead class="bg-base-200 text-sm text-base-content">
               <tr><th>Dimensi (cm)</th><th>Qty</th><th>CBM</th><th class="text-right">Aksi</th></tr>
             </thead>
             <tbody>
@@ -171,15 +176,15 @@ export function renderItems() {
           </table>
         </div>
         
-        <div class="bg-base-100 rounded-box border border-base-300 overflow-hidden shadow-sm">
+        <div class="bg-base-100 rounded-box border border-base-300 overflow-hidden shadow-sm mt-auto">
           <div class="grid grid-cols-3 divide-x divide-base-300 border-b border-base-300">
             <div class="p-3 text-center">
               <div class="text-[10px] font-bold uppercase tracking-widest opacity-50">Karton</div>
-              <div class="text-base sm:text-lg font-bold mt-1">${totQty}</div>
+              <div class="text-base sm:text-lg font-mono font-bold mt-1">${totQty}</div>
             </div>
             <div class="p-3 text-center">
               <div class="text-[10px] font-bold uppercase tracking-widest opacity-50">CBM Total</div>
-              <div class="text-base sm:text-lg font-bold text-primary mt-1">${cbm.toFixed(2)}</div>
+              <div class="text-base sm:text-lg font-mono font-bold text-primary mt-1">${cbm.toFixed(2)}</div>
             </div>
             <div class="p-3 text-center">
               <div class="text-[10px] font-bold uppercase tracking-widest opacity-50">Freight</div>
@@ -189,11 +194,11 @@ export function renderItems() {
           <div class="grid grid-cols-2 divide-x divide-base-300 bg-base-200/30">
             <div class="p-3 sm:p-4">
               <div class="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-2">Input CFR ($)</div>
-              <input type="text" value="${cfr || ""}" placeholder="0.00" inputmode="decimal" data-cfr="${idx}" class="input input-sm sm:input-md input-bordered w-full font-mono bg-base-100 focus-within:border-primary">
+              <input type="text" value="${cfr || ""}" placeholder="0.00" inputmode="decimal" data-cfr="${idx}" class="input input-sm sm:input-md input-bordered w-full font-mono font-bold text-base bg-base-100 focus-within:border-primary">
             </div>
             <div class="p-3 sm:p-4">
               <div class="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-2">Input FOB ($)</div>
-              <input type="text" value="${fob || ""}" placeholder="0.00" inputmode="decimal" data-fob="${idx}" class="input input-sm sm:input-md input-bordered w-full font-mono bg-base-100 focus-within:border-primary">
+              <input type="text" value="${fob || ""}" placeholder="0.00" inputmode="decimal" data-fob="${idx}" class="input input-sm sm:input-md input-bordered w-full font-mono font-bold text-base bg-base-100 focus-within:border-primary">
             </div>
           </div>
         </div>
@@ -253,15 +258,15 @@ export function renderValidation() {
   const tag = (rowId, statusId, a, t, has, prefix = "$ ") => {
     const r = $(rowId), tg = $(statusId);
     if (!r || !tg) return;
-    r.className = "border-b border-neutral-content/10";
-    if (!has) { tg.textContent = "—"; tg.className = "text-center font-bold text-neutral-content/50"; return; }
+    tg.classList.remove("match-anim", "miss-anim");
+    if (!has) { tg.innerHTML = '<span class="status-badge status-badge-muted"><span>—</span></span>'; return; }
     const diff = R2(a - t);
     if (diff === 0) { 
-      tg.textContent = "MATCH ✓"; 
-      tg.className = "text-center font-bold text-success match-anim"; 
+      tg.innerHTML = statusBadge("success", "Match"); 
+      tg.classList.add("match-anim");
     } else { 
-      tg.textContent = `SELISIH ${prefix}${fmt(Math.abs(diff))}`; 
-      tg.className = "text-center font-bold text-error miss-anim"; 
+      tg.innerHTML = statusBadge("error", `${prefix}${fmt(Math.abs(diff))}`, "fa-not-equal"); 
+      tg.classList.add("miss-anim");
     }
   };
   
