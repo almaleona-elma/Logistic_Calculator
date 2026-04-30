@@ -1,0 +1,18 @@
+# Sample documents (SI, CI, PL)
+samples/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Editor
+.vscode/
+*.swp
+*.swo
+*~
+
+# Dependencies
+node_modules/
+
+# Misc
+*.log
