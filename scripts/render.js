@@ -69,16 +69,18 @@ export function renderTemplates() {
     sC += tp.cbmTarget; sQ += tp.qtyTotal; sA += al;
     
     const chip = si === 0
-      ? '<span class="badge badge-success badge-sm font-semibold text-white">HABIS ✓</span>'
+      ? '<span class="text-xs font-bold text-success"><i class="fa-solid fa-check"></i> Habis</span>'
       : si > 0
-        ? `<span class="badge badge-warning badge-sm font-semibold">${si} sisa</span>`
-        : `<span class="badge badge-error badge-sm font-semibold text-white">${Math.abs(si)} LEBIH</span>`;
+        ? `<span class="text-xs font-bold text-warning">${si} Sisa</span>`
+        : `<span class="text-xs font-bold text-error">${Math.abs(si)} Lebih</span>`;
         
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>
-        <input type="text" value="${tp.name}" class="input input-xs input-ghost w-full max-w-[100px] font-bold tpl-edit tpl-edit-name" data-tpl-name="${i}"><br>
-        <div class="flex items-center gap-1 mt-1 text-xs">
+        <input type="text" value="${tp.name}" class="input input-xs input-ghost w-full max-w-[100px] font-bold tpl-edit tpl-edit-name" data-tpl-name="${i}">
+      </td>
+      <td>
+        <div class="flex items-center gap-1 text-xs">
           <input type="text" inputmode="decimal" value="${tp.p}" class="input input-xs input-bordered w-12 text-center tpl-edit tpl-edit-dim" data-tpl-p="${i}"> ×
           <input type="text" inputmode="decimal" value="${tp.l}" class="input input-xs input-bordered w-12 text-center tpl-edit tpl-edit-dim" data-tpl-l="${i}"> ×
           <input type="text" inputmode="decimal" value="${tp.t}" class="input input-xs input-bordered w-12 text-center tpl-edit tpl-edit-dim" data-tpl-t="${i}">
@@ -89,7 +91,7 @@ export function renderTemplates() {
       <td><input type="number" min="0" value="${tp.qtyTotal}" class="input input-xs input-bordered w-16 text-right tpl-edit" data-tpl-qty="${i}"></td>
       <td class="font-bold">${al}</td>
       <td>${chip}</td>
-      <td class="text-center"><button class="btn btn-error btn-xs btn-square" data-del-tpl="${i}" title="Hapus"><i class="fa fa-trash"></i></button></td>
+      <td class="text-center"><button class="btn btn-ghost btn-xs text-error" data-del-tpl="${i}" title="Hapus"><i class="fa fa-trash"></i></button></td>
     `;
     tb.appendChild(tr);
   });
@@ -121,8 +123,8 @@ export function renderItems() {
           <td class="font-bold">${c.qty}</td>
           <td class="font-mono text-xs">${(cbmPU * c.qty).toFixed(4)}</td>
           <td class="text-right space-x-1">
-            <button class="btn btn-warning btn-xs btn-square" data-xfer="${idx},${ci}" title="Transfer Kardus"><i class="fa fa-arrow-right-arrow-left"></i></button>
-            <button class="btn btn-error btn-xs btn-square" data-del-cart="${idx},${ci}" title="Hapus Kardus"><i class="fa fa-times"></i></button>
+            <button class="btn btn-ghost btn-xs text-warning" data-xfer="${idx},${ci}" title="Transfer Kardus"><i class="fa fa-arrow-right-arrow-left"></i></button>
+            <button class="btn btn-ghost btn-xs text-error" data-del-cart="${idx},${ci}" title="Hapus Kardus"><i class="fa fa-times"></i></button>
           </td>
         </tr>`;
     });
@@ -132,34 +134,34 @@ export function renderItems() {
     let qS = "";
     if (item.targetQty > 0) {
       if (totQty === item.targetQty)
-        qS = '<span class="badge badge-success badge-sm font-semibold text-white ml-2">PAS ✓</span>';
+        qS = '<span class="text-xs font-bold text-success ml-2"><i class="fa-solid fa-check"></i> Pas</span>';
       else if (totQty < item.targetQty)
-        qS = `<span class="badge badge-warning badge-sm font-semibold ml-2">Kurang ${item.targetQty - totQty}</span>`;
+        qS = `<span class="text-xs font-bold text-warning ml-2">Kurang ${item.targetQty - totQty}</span>`;
       else
-        qS = `<span class="badge badge-error badge-sm font-semibold text-white ml-2">Lebih ${totQty - item.targetQty}</span>`;
+        qS = `<span class="text-xs font-bold text-error ml-2">Lebih ${totQty - item.targetQty}</span>`;
     }
 
     const div = document.createElement("div");
-    div.className = "card bg-base-200 border border-base-300";
+    div.className = "card bg-base-200 border border-base-300 shadow-sm";
     div.innerHTML = `
       <div class="card-body p-4 lg:p-5">
-        <div class="flex justify-between items-start mb-4 border-b border-base-300 pb-3">
+        <div class="flex justify-between items-center mb-4 border-b border-base-300 pb-3 gap-2">
           <div>
-            <h3 class="font-bold text-lg text-primary">Item No. ${item.itemNo}</h3>
-            <div class="flex items-center mt-1">
-              <span class="text-sm mr-2 opacity-70">Target Qty:</span>
+            <h3 class="font-bold text-lg text-primary leading-tight">Item No. ${item.itemNo}</h3>
+            <div class="flex flex-wrap items-center mt-1 gap-2">
+              <span class="text-sm opacity-70">Target Qty:</span>
               <input type="number" value="${item.targetQty || ""}" placeholder="0" data-tq="${idx}" min="0" class="input input-bordered input-xs w-16 text-center">
               ${qS}
             </div>
           </div>
-          <div class="flex gap-2">
-            <button class="btn btn-secondary btn-sm" data-add-cart="${idx}" title="Tambah Kardus"><i class="fa fa-plus"></i></button>
+          <div class="flex gap-1">
+            <button class="btn btn-secondary btn-sm" data-add-cart="${idx}" title="Tambah Karton"><i class="fa fa-plus"></i> <span class="hidden sm:inline">Karton</span></button>
             <button class="btn btn-error btn-sm btn-square" data-del-item="${idx}" title="Hapus Item"><i class="fa fa-trash"></i></button>
           </div>
         </div>
         
         <div class="overflow-x-auto mb-4 bg-base-100 rounded-box border border-base-300">
-          <table class="table table-xs w-full">
+          <table class="table table-xs w-full whitespace-nowrap">
             <thead class="bg-base-200">
               <tr><th>Dimensi (cm)</th><th>Qty</th><th>CBM</th><th class="text-right">Aksi</th></tr>
             </thead>
@@ -169,26 +171,30 @@ export function renderItems() {
           </table>
         </div>
         
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-2 text-sm bg-base-100 p-3 rounded-box border border-base-300">
-          <div class="flex flex-col">
-            <span class="text-xs opacity-60">Total Karton</span>
-            <span class="font-bold text-lg">${totQty}</span>
+        <div class="bg-base-100 rounded-box border border-base-300 overflow-hidden shadow-sm">
+          <div class="grid grid-cols-3 divide-x divide-base-300 border-b border-base-300">
+            <div class="p-3 text-center">
+              <div class="text-[10px] font-bold uppercase tracking-widest opacity-50">Karton</div>
+              <div class="text-base sm:text-lg font-bold mt-1">${totQty}</div>
+            </div>
+            <div class="p-3 text-center">
+              <div class="text-[10px] font-bold uppercase tracking-widest opacity-50">CBM Total</div>
+              <div class="text-base sm:text-lg font-bold text-primary mt-1">${cbm.toFixed(2)}</div>
+            </div>
+            <div class="p-3 text-center">
+              <div class="text-[10px] font-bold uppercase tracking-widest opacity-50">Freight</div>
+              <div class="text-base sm:text-lg font-bold font-mono mt-1">${fmt(freight)}</div>
+            </div>
           </div>
-          <div class="flex flex-col border-l-4 border-primary pl-2">
-            <span class="text-xs opacity-60">CBM Total</span>
-            <span class="font-bold text-lg text-primary">${cbm.toFixed(2)}</span>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-xs opacity-60">Freight ($)</span>
-            <span class="font-bold text-lg font-mono">${fmt(freight)}</span>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-xs opacity-60">CFR ($)</span>
-            <input type="text" value="${cfr || ""}" placeholder="0" inputmode="decimal" data-cfr="${idx}" class="input input-sm input-bordered w-full font-mono text-right mt-1">
-          </div>
-          <div class="flex flex-col">
-            <span class="text-xs opacity-60">FOB ($)</span>
-            <input type="text" value="${fob || ""}" placeholder="0" inputmode="decimal" data-fob="${idx}" class="input input-sm input-bordered w-full font-mono text-right mt-1">
+          <div class="grid grid-cols-2 divide-x divide-base-300 bg-base-200/30">
+            <div class="p-3 sm:p-4">
+              <div class="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-2">Input CFR ($)</div>
+              <input type="text" value="${cfr || ""}" placeholder="0.00" inputmode="decimal" data-cfr="${idx}" class="input input-sm sm:input-md input-bordered w-full font-mono bg-base-100 focus-within:border-primary">
+            </div>
+            <div class="p-3 sm:p-4">
+              <div class="text-[10px] font-bold uppercase tracking-widest opacity-50 mb-2">Input FOB ($)</div>
+              <input type="text" value="${fob || ""}" placeholder="0.00" inputmode="decimal" data-fob="${idx}" class="input input-sm sm:input-md input-bordered w-full font-mono bg-base-100 focus-within:border-primary">
+            </div>
           </div>
         </div>
         
