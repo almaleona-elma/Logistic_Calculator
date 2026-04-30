@@ -16,8 +16,7 @@
 | `js/modal.js`  | Modal system (alert, confirm, dus, transfer)               |
 | `js/app.js`    | Entry point: event wiring + initialization                |
 | `style.css`    | ~1128 baris, theme Frost Lavender (light + dark mode)     |
-| `test.js`      | Test suite — 48 test cases, jalankan `node test.js`       |
-| `app_final.py` | Backend Python (referensi, tidak digunakan aktif di web)  |
+| `test.js`      | Test suite — 73 test cases, jalankan `node test.js`       |
 
 ---
 
@@ -234,5 +233,5 @@ SI/PL → Ukuran karton (P×L×T) + qty per template + qty target per item
 
 1. **Locking item** — kunci item tertentu agar tidak terpengaruh auto-solve
 2. **Grouping by Marking** — jika data marking tersedia
-3. **ILP-based Auto-Solve** — port logika PuLP dari `app_final.py` ke browser
+3. **ILP-based Auto-Solve** — port logika ILP ke browser via `javascript-lp-solver`
 4. **Import/Export JSON** — save/load skenario kalkulasi sebagai file
