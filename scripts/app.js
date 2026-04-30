@@ -18,6 +18,22 @@ import {
 const $ = (id) => document.getElementById(id);
 
 // ══════════════════════════════════════════════
+//  INPUT SANITIZATION (STRICT NUMBER)
+// ══════════════════════════════════════════════
+document.addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.tagName === "INPUT") {
+    if (t.type === "number") {
+      // Hanya izinkan angka 0-9
+      t.value = t.value.replace(/[^0-9]/g, "");
+    } else if (t.inputMode === "decimal") {
+      // Izinkan angka, titik, dan koma
+      t.value = t.value.replace(/[^0-9.,]/g, "");
+    }
+  }
+});
+
+// ══════════════════════════════════════════════
 //  GLOBAL PANEL
 // ══════════════════════════════════════════════
 const gPrice = $("g-price"),
