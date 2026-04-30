@@ -1125,3 +1125,30 @@ select,
   gap: 6px;
   animation: fadeIn 0.3s ease;
 }
+
+/* ── Incoterms® 2020 Validation Warnings ── */
+#inco-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.inco-error,
+.inco-warning {
+  padding: 8px 12px;
+  font-size: 12.5px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: fadeIn 0.3s ease;
+}
+.inco-error {
+  background: rgba(229, 124, 124, 0.1);
+  border-left: 3px solid var(--red);
+  color: var(--red);
+}
+.inco-warning {
+  background: rgba(201, 163, 95, 0.08);
+  border-left: 3px solid var(--orange);
+  color: var(--orange);
+}
