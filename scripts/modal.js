@@ -24,7 +24,7 @@ export function showAlert(msg, type = "success") {
   };
   mIcon.innerHTML = icons[type] || icons.success;
   mMsg.textContent = msg;
-  mActions.innerHTML = `<button class="btn btn-primary" id="modal-ok">OK</button>`;
+  mActions.innerHTML = `<button class="btn btn-primary" id="modal-ok"><i class="fa-solid fa-check"></i> Mengerti</button>`;
   
   mDialog.showModal();
   
@@ -40,8 +40,8 @@ export function showConfirm(msg) {
   mIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-warning"></i>';
   mMsg.textContent = msg;
   mActions.innerHTML = `
-    <button class="btn btn-ghost" id="modal-no">Batal</button>
-    <button class="btn btn-primary" id="modal-yes">Ya, Lanjut</button>
+    <button class="btn btn-ghost" id="modal-no"><i class="fa-solid fa-xmark"></i> Batal</button>
+    <button class="btn btn-primary" id="modal-yes"><i class="fa-solid fa-check"></i> Ya, Lanjut</button>
   `;
   
   mDialog.showModal();
