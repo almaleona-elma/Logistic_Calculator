@@ -1,7 +1,7 @@
 # Kalkulator PEB — Development Log
 
 > Dokumen ini merangkum seluruh histori pengembangan, keputusan arsitektur, dan domain knowledge dari proyek Kalkulator Draft PEB.  
-> **Terakhir diperbarui:** 2026-04-27
+> **Terakhir diperbarui:** 2026-04-30
 
 ---
 
@@ -10,10 +10,14 @@
 | File           | Fungsi                                                    |
 | -------------- | --------------------------------------------------------- |
 | `index.html`   | Layout utama, 4 panel + 3 modal (Alert, Dus, Transfer)    |
-| `script.js`    | ~960 baris, semua logika kalkulasi, OCR, rendering, state |
-| `style.css`    | ~1087 baris, theme Frost Lavender (light + dark mode)     |
-| `app_final.py` | Backend Python (tidak digunakan aktif di web)             |
-| `*.backup`     | Backup file sebelum fitur transfer/auto-solve ditambahkan |
+| `js/calc.js`   | Pure calculation functions (R2, pf, getCbmPerUnit, dll)   |
+| `js/state.js`  | State management + localStorage + factory functions       |
+| `js/render.js` | DOM rendering (templates, items, validation)               |
+| `js/modal.js`  | Modal system (alert, confirm, dus, transfer)               |
+| `js/app.js`    | Entry point: event wiring + initialization                |
+| `style.css`    | ~1128 baris, theme Frost Lavender (light + dark mode)     |
+| `test.js`      | Test suite — 48 test cases, jalankan `node test.js`       |
+| `app_final.py` | Backend Python (referensi, tidak digunakan aktif di web)  |
 
 ---
 
@@ -44,41 +48,46 @@ SI/PL → Ukuran karton (P×L×T) + qty per template + qty target per item
          ↓
    Distribusi karton ke item (Manual / Auto-Solve / Transfer)
          ↓
-   CBM per item = Σ(cbmPU × qty_karton)
+   CBM per item = Σ(getCbmPerUnit(tp) × qty_karton)
          ↓
-   Freight per item = R2(R2(CBM) × Rate)
+   Freight per item = R2(CBM × Rate)     ← single rounding
          ↓
    FOB per item = CFR − Freight  ← INI YANG DICARI
 ```
 
-### Fungsi Kunci
+### Modul & Fungsi Kunci
 
-| Fungsi                    | Lokasi | Deskripsi                                                |
-| ------------------------- | ------ | -------------------------------------------------------- |
-| `calcItemFreights()`      | ~L590  | Hitung CBM & freight per item dari karton yang dialokasi |
-| `calcAllCfrFob(freights)` | ~L116  | Hitung CFR/FOB per item, remainder ke item terkecil      |
-| `renderItems()`           | ~L612  | Render semua item card + carton rows                     |
-| `renderTemplates()`       | ~L527  | Render tabel template master                             |
-| `validate()`              | ~L823  | Rekapitulasi & validasi (CBM, Freight, CFR, FOB match)   |
-| `buildTplMap()`           | ~L163  | O(1) lookup template by ID                               |
-| `buildAllocMap()`         | ~L169  | Hitung total alokasi per template                        |
+| Fungsi                         | Modul       | Deskripsi                                                |
+| ------------------------------ | ----------- | -------------------------------------------------------- |
+| `getCbmPerUnit(tp)`            | `calc.js`   | CBM per unit — single source of truth                    |
+| `calcItemCbm(item, tplMap)`    | `calc.js`   | Hitung CBM & qty total item dari karton                  |
+| `calcFreight(rawCbm, rate)`    | `calc.js`   | Freight = CBM × Rate (single rounding)                   |
+| `calcAllCfrFob(items, ...)`    | `calc.js`   | CFR/FOB per item + remainder ke item terkecil            |
+| `calcGlobalTriad(...)`         | `calc.js`   | Auto-calc 2 dari 3 (freight, cfr, fob)                  |
+| `recalcTemplate(tp)`           | `calc.js`   | Recalc cbmPerUnit + cbmTarget setelah edit dimensi       |
+| `buildTplMap()`                | `state.js`  | O(1) lookup template by ID                               |
+| `buildAllocMap()`              | `state.js`  | Hitung total alokasi per template                        |
+| `createTemplate(...)` / `createItem(...)` | `state.js` | Factory functions dengan auto-ID              |
+| `renderAll()`                  | `render.js` | Render templates + items + validation + save state       |
+| `buildResultText()`            | `render.js` | Bangun teks clipboard untuk "Copy Hasil"                 |
 
 ### Konstanta & Aturan Penting
 
-1. **CBM per unit untuk kalkulasi:** `cbmTarget / qtyTotal` (BUKAN `cbmPerUnit` dari P×L×T)
+1. **CBM per unit untuk kalkulasi:** `getCbmPerUnit(tp)` = `cbmTarget / qtyTotal` (BUKAN `cbmPerUnit` dari P×L×T)
    - Alasan: SI/forwarder memberikan cbmTarget yang sudah dibulatkan (misal 5.67)
    - Jika pakai cbmPerUnit (0.202640), split item tidak akan sum kembali ke 5.67
    - `cbmTarget / qtyTotal` = 5.67/28 = 0.2025 → 25×0.2025 + 3×0.2025 = 5.67 ✓
 
 2. **Pembulatan:**
    - `R2(x)` = Math.round(x \* 100) / 100 (2 desimal)
-   - CBM selalu dibulatkan R2 sebelum dikali Rate
+   - Freight = `R2(rawCbm * rate)` — **single rounding**, bukan `R2(R2(rawCbm) * rate)`
    - Qty karton selalu bulat (integer) — tidak ada 0.5 karton
 
-3. **Remainder FOB:** Selisih FOB dialokasikan ke item dengan qty terkecil (overproduction)
+3. **Remainder FOB:** Selisih FOB dialokasikan ke item dengan CFR terkecil (overproduction)
 
 4. **Format angka:** Titik (.) untuk desimal, koma (,) untuk digit separator
    - `<html lang="en">` untuk memaksa format ini
+   - `pf()` multi-format parser: handle US (1,234.56), EU (1.234,56), comma decimal
 
 ### Freight Reasonableness Warning
 
@@ -96,6 +105,7 @@ SI/PL → Ukuran karton (P×L×T) + qty per template + qty target per item
 - Sort items by **targetQty descending** — item utama (qty terbanyak) mendapat prioritas
 - Alokasi: item utama → ambil karton terbesar → lanjut ke berikutnya
 - Item order (itemNo) TIDAK berubah setelah auto-solve
+- Item tanpa targetQty TIDAK di-clear kartonnya
 
 ### 2. Quick Redistribute (Transfer ↔)
 
@@ -131,17 +141,11 @@ SI/PL → Ukuran karton (P×L×T) + qty per template + qty target per item
 - 3 modal: Alert/Confirm, Pilih Dus, Transfer Karton
 - Semua menggunakan Promise-based API (`showAlert`, `showConfirm`, `showDusModal`, `showTransferModal`)
 
-### OCR Paste Zones
-
-- Paste screenshot / upload PDF → Tesseract.js OCR
-- 3 zona: Global (freight/fob), Items (qty), CFR per item
-- Preview editable sebelum apply ke form
-
 ### State Persistence
 
 - `localStorage` key: `kalkulatorPEB_state`
 - Auto-save setiap `renderAll()`
-- Auto-load saat `DOMContentLoaded`
+- Auto-load saat module init
 - Reset: hapus localStorage + clear form
 - Theme key: `kalkulatorPEB_theme`
 
@@ -183,6 +187,14 @@ SI/PL → Ukuran karton (P×L×T) + qty per template + qty target per item
 - **C5 — g-rate-warning:** Tambahkan element HTML yang hilang
 - **Lesson:** Selalu audit rounding chain end-to-end; pastikan setiap element yang direferensikan JS ada di HTML
 
+### 5. Restructure: Monolith → ES Modules (2026-04-30)
+
+- **Issue:** `script.js` = 1,380 baris monolitik, untestable, DRY violations
+- **Fix:** Split ke 5 ES modules: `calc.js`, `state.js`, `modal.js`, `render.js`, `app.js`
+- **DRY eliminated:** CBM ternary (4× → `getCbmPerUnit()`), template recalc (3× → `recalcTemplate()`), item factory (2× → `createItem()`)
+- **OCR dihapus:** Tesseract.js, pdf.js, paste zones, semua parser
+- **Lesson:** Pisahkan pure logic dari DOM — memungkinkan unit testing tanpa browser
+
 ---
 
 ## 📋 Conversation History Summary
@@ -203,12 +215,14 @@ SI/PL → Ukuran karton (P×L×T) + qty per template + qty target per item
 | 2026-04-27 | Quick redistribute (transfer modal)  | ✅                       |
 | 2026-04-27 | Fix tfPrev collision bug             | ✅                       |
 | 2026-04-30 | Analisis & fix akurasi perhitungan   | ✅                       |
+| 2026-04-30 | Restructure → 5 ES modules          | ✅                       |
+| 2026-04-30 | Hapus OCR (Tesseract/pdf.js)         | ✅                       |
 
 ---
 
 ## 📝 Future Ideas (Belum Implementasi)
 
 1. **Locking item** — kunci item tertentu agar tidak terpengaruh auto-solve
-2. **Grouping by Marking** — jika data marking tersedia dari OCR
-3. **Scan dokumen SI/CI/PL** — dibatalkan tapi bisa dikerjakan ulang
-4. **Split script.js** ke modul terpisah — user pernah tanya tapi belum dilakukan
+2. **Grouping by Marking** — jika data marking tersedia
+3. **ILP-based Auto-Solve** — port logika PuLP dari `app_final.py` ke browser
+4. **Import/Export JSON** — save/load skenario kalkulasi sebagai file
