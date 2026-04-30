@@ -1,0 +1,25 @@
+/* 
+  Custom styles for Kalkulator Draft PEB 
+  Most styling is handled by Tailwind CSS + DaisyUI in index.html.
+  Use this file for custom tweaks, animations, or overrides.
+*/
+
+.match-anim {
+  animation: pulse-success 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-success {
+  0% { color: inherit; }
+  50% { color: oklch(var(--su)); } /* DaisyUI success color */
+  100% { color: inherit; }
+}
+
+.miss-anim {
+  animation: pulse-error 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-error {
+  0% { color: inherit; }
+  50% { color: oklch(var(--er)); } /* DaisyUI error color */
+  100% { color: inherit; }
+}
